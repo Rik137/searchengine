@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
   datasource:
     username: root
     password: Ric137!Marina!
@@ -11,7 +13,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
 
 indexing-settings:
