@@ -40,14 +40,4 @@ public class SiteEntity {
     @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LemmaEntity> lemmaEntityList;
 
-    public SiteEntity(Status status, LocalDateTime statusTime,
-                      String lastError, String url, String name,
-                      List<PageEntity> pageEntityList) {
-        this.status = status;
-        this.statusTime = statusTime;
-        this.lastError = lastError;
-        this.url = url;
-        this.name = name;
-        this.pageEntityList = pageEntityList;
-    }
 }

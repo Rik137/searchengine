@@ -1,5 +1,17 @@
 server:
   port: 8080
+logging:
+  level:
+    org.apache.coyote.http11.Http11Processor: ERROR
+rickbot:
+  user-agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15"
+    - "RickBot/1.0 (compatible; MSIE 10.0; Windows NT)"
+  min-delay-ms: 500
+  max-delay-ms: 2000
+  referer: "https://github.com/Rik137/searchengine/blob/main/README.md"
+
 
 spring:
   liquibase:
@@ -16,11 +28,12 @@ spring:
       ddl-auto: none
     show-sql: true
 
+
 indexing-settings:
   sites:
-    - url: https://www.lenta.ru
-      name: Лента.ру
-    - url: https://www.skillbox.ru
-      name: Skillbox
+#    - url: https://www.lenta.ru
+#      name: Лента.ру
+#    - url: https://www.skillbox.ru
+#      name: Skillbox
     - url: https://www.playback.ru
       name: PlayBack.Ru

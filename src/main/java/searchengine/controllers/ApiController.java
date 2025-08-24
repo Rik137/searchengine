@@ -44,9 +44,8 @@ public class ApiController {
             log.warn("Попытка запустить индексацию при уже запущенном процессе");
             return error("Индексация уже запущена", HttpStatus.BAD_REQUEST);
         }
-        String message = indexingService.startIndexing();
-        log.info("Индексация успешно запущена");
-        log.info(message);
+
+        indexingService.startIndexing();
         return ResponseEntity.ok(new ApiResponse(true, null));
     }
 
@@ -59,8 +58,7 @@ public class ApiController {
             return error("Индексация не запущена", HttpStatus.BAD_REQUEST);
         }else {
             log.warn("попытка остановить индексацию");
-            String message = indexingService.stopIndexing();
-            log.info(message);
+            indexingService.stopIndexing();
             return ResponseEntity.ok(new ApiResponse(true, null));
         }
     }

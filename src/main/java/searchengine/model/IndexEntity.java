@@ -29,9 +29,4 @@ public class IndexEntity {
     @Column(name = "rank_value", nullable = false)
     private float rank;
 
-    public IndexEntity(PageEntity pageEntity, LemmaEntity lemmaEntity, float rank) {
-        this.pageEntity = pageEntity;
-        this.lemmaEntity = lemmaEntity;
-        this.rank = rank;
-    }
 }

@@ -1,6 +1,6 @@
 package searchengine.services.serviceinterfaces;
 
 public interface IndexingService {
-    String startIndexing();
-    String stopIndexing();
+    void startIndexing();
+    void stopIndexing();
 }
