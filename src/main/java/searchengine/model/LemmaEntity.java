@@ -25,7 +25,7 @@ public class LemmaEntity {
     private SiteEntity siteEntity;
 
     @Column(name = "lemma", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String lemmaEntity;
+    private String lemma;
 
     @Column(name = "frequency", nullable = false)
     private int frequency;

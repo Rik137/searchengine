@@ -82,4 +82,8 @@ public class ManagerJSOUP {
             return -1;
         }
     }
+
+    public String stripHtmlTags(String html){
+        return Jsoup.parse(html).text();
+    }
 }
