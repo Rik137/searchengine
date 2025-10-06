@@ -31,9 +31,7 @@ spring:
 
 indexing-settings:
   sites:
-#    - url: https://www.lenta.ru
-#      name: Лента.ру
-#    - url: https://www.skillbox.ru
-#      name: Skillbox
+    - url: https://nikoartgallery.com/
+      name: Nikoargallery.com
     - url: https://www.playback.ru
       name: PlayBack.Ru

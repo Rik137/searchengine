@@ -49,10 +49,14 @@ public class LemmaFilter {
 
     /** Проверка, является ли слово служебной частью речи */
     private boolean isNotServiceWord(String word) {
-        List<String> morphInfo = luceneMorphology.getMorphInfo(word);
-        return morphInfo.stream().noneMatch(info ->
-                SERVICE_POS.stream().anyMatch(info::contains)
-        );
+        word = normalizeRussianWord(word);
+        if(isValidRussianWord(word)) {
+            List<String> morphInfo = luceneMorphology.getMorphInfo(word);
+            return morphInfo.stream().noneMatch(info ->
+                    SERVICE_POS.stream().anyMatch(info::contains)
+            );
+        }
+        return false;
     }
 
     /** Убирает HTML-теги из текста */
@@ -71,6 +75,13 @@ public class LemmaFilter {
                 .filter(word -> !word.isEmpty())       // убираем пустые строки
                 .filter(word -> !word.matches("[a-z]+")) // убираем английские слова
                 .toList();
+    }
+    public String normalizeRussianWord(String word) {
+        return word.toLowerCase()
+                .replaceAll("[^а-яё]", ""); // только русские буквы
+    }
+    public boolean isValidRussianWord(String word) {
+        return word.matches("[а-яё]+");
     }
 }
 

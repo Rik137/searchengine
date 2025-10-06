@@ -30,7 +30,6 @@ public class SiteTask extends RecursiveAction {
 
         try {
             log.info("Обработка сайта: {}", site.getUrl());
-
             // Получаем страницы только внутри сайта
             List<String> pages = context.getManagerJSOUP().getLinksFromPage(site.getUrl(), site.getUrl());
 

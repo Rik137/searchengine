@@ -6,10 +6,9 @@ import searchengine.dto.PageResponse;
 import searchengine.model.PageEntity;
 import searchengine.model.SiteEntity;
 import searchengine.services.util.IndexingContext;
-
 import java.util.List;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.RecursiveAction;
+
 @Slf4j
 @RequiredArgsConstructor
 public class PageTask extends RecursiveAction {
@@ -35,10 +34,10 @@ public class PageTask extends RecursiveAction {
                     htmlBody
             );
             context.getManagerRepository().savePage(page);
-//            if (resp.isHtml() && resp.getBody() != null) {
-//                String textForLemma = context.getManagerJSOUP().stripHtmlTags(resp.getBody());
-//                // передаём textForLemma в лемматизатор
-//            }
+
+
+                context.getLemmaFrequencyService().savePageLemmasAndIndexesThreadSafe(page, page.getContent());
+
             if (resp.isHtml() && resp.getBody() != null) {
                 List<PageTask> refs = context.getManagerJSOUP()
                         .getLinksFromPage(url, siteDomain)

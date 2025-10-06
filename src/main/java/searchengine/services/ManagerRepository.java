@@ -158,6 +158,25 @@ public class ManagerRepository {
         }
     }
     @Transactional(readOnly = true)
+    public Optional<LemmaEntity> findLemma(String lemma, int siteId) {
+        try {
+            return lemmaRepository.findByLemmaAndSiteId(lemma, siteId);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске леммы с id={} site_id={}", lemma, siteId, e);
+            return Optional.empty();
+        }
+    }
+    @Transactional(readOnly = true)
+    public Optional<LemmaEntity> findLemma(String lemma, SiteEntity site) {
+        try {
+            return lemmaRepository.findByLemmaAndSite(lemma, site);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске леммы с id={} site_id={}", lemma, site.getId(), e);
+            return Optional.empty();
+        }
+    }
+
+    @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(String lemma) {
         try {
             return lemmaRepository.findByLemma(lemma);
@@ -223,4 +242,5 @@ public class ManagerRepository {
             return false;
         }
     }
+
 }

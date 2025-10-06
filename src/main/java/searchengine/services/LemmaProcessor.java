@@ -3,6 +3,7 @@ package searchengine.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.morphology.LuceneMorphology;
+import org.apache.lucene.morphology.WrongCharaterException;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Service;
 import searchengine.services.util.LemmaFilter;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -24,10 +26,17 @@ public class LemmaProcessor {
      * Генерирует список всех лемм из текста.
      */
     private List<String> generateLemmas(String text) {
-        List<String> words = lemmaFilter.tokenizeText(text);
-        return words.stream()
-                .flatMap(word -> lemmaFilter.getLuceneMorphology()
-                        .getNormalForms(word).stream())
+        return lemmaFilter.tokenizeText(text).stream()
+                .map(lemmaFilter::normalizeRussianWord)   // очистка
+                .filter(word -> !word.isEmpty())           // убираем пустые
+                .flatMap(word -> {
+                    try {
+                        return lemmaFilter.getLuceneMorphology().getNormalForms(word).stream();
+                    } catch (WrongCharaterException e) {
+                        log.debug("Пропущено некорректное слово для морфологии: {}", word);
+                        return Stream.empty();
+                    }
+                })
                 .toList();
     }
 

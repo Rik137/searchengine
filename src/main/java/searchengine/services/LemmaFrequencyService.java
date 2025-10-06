@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.IndexEntity;
 import searchengine.model.LemmaEntity;
 import searchengine.model.PageEntity;
+import searchengine.model.SiteEntity;
 import searchengine.services.util.EntityFactory;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class LemmaFrequencyService {
     @Transactional
     public void decreaseLemmaFrequencies(PageEntity page){
         String content = page.getContent();
+        SiteEntity site = page.getSiteEntity();
         if (content == null || content.isBlank()) {
             log.warn("Пустой контент для страницы id={}", page.getId());
             return;
@@ -33,7 +35,7 @@ public class LemmaFrequencyService {
             String lemmaName = entry.getKey();
             int countToRemove = entry.getValue();
 
-            managerRepository.findLemma(lemmaName).ifPresentOrElse(
+            managerRepository.findLemma(lemmaName, site).ifPresentOrElse(
                     lemmaEntity -> {
                         int newFrequency = lemmaEntity.getFrequency() - countToRemove;
                         lemmaEntity.setFrequency(Math.max(newFrequency, 0));
@@ -60,7 +62,11 @@ public class LemmaFrequencyService {
             String lemmaName = entry.getKey();
             int frequencyToAdd = entry.getValue();
 
-            Optional<LemmaEntity> lemmaOpt = managerRepository.findLemma(lemmaName);
+            Optional<LemmaEntity> lemmaOpt = managerRepository.findLemma(
+                    lemmaName,
+                    page.getSiteEntity().getId()
+            );
+
             LemmaEntity lemmaEntity;
 
             if (lemmaOpt.isEmpty()) {
@@ -76,5 +82,8 @@ public class LemmaFrequencyService {
             IndexEntity index = entityFactory.createIndexEntity(page, lemmaEntity);
             managerRepository.saveIndex(index);
         }
+    }
+    public synchronized void savePageLemmasAndIndexesThreadSafe(PageEntity page, String content){
+        savePageLemmasAndIndexes(page, content);
     }
 }

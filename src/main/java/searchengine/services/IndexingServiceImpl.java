@@ -1,23 +1,22 @@
 package searchengine.services;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.services.serviceinterfaces.IndexingService;
+import searchengine.services.util.Stopwatch;
 
 @Slf4j
 @Setter
 @Service
+@RequiredArgsConstructor
 public class IndexingServiceImpl implements IndexingService {
 
     private  boolean statusIndexing = false;
     private final ManagerTasks managerTasks;
-
-    @Autowired
-    public IndexingServiceImpl(ManagerTasks managerTasks, SitesList sitesList) {
-        this.managerTasks = managerTasks;
-    }
+    private Stopwatch stopwatch = new Stopwatch();
 
     public boolean isIndexing(){
         return statusIndexing;
@@ -27,8 +26,11 @@ public class IndexingServiceImpl implements IndexingService {
     public void startIndexing(){
         setStatusIndexing(true);
         animationPrepareIndexing();
+        stopwatch.start();
         managerTasks.startIndexTask();
+        stopwatch.stop();
         setStatusIndexing(false);
+        log.info("Индексация прошла за {} cek.", stopwatch.getTime());
     }
 
     @Override
