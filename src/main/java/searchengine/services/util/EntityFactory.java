@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class EntityFactory {
     public SiteEntity createSiteEntity(String name, String url){
         SiteEntity site = new SiteEntity();
-        site.setStatus(Status.INDEXED);
+        site.setStatus(Status.INDEXING);
         site.setName(name);
         site.setUrl(url);
         site.setStatusTime(LocalDateTime.now());
@@ -24,10 +24,11 @@ public class EntityFactory {
         page.setContent(content);
         return page;
     }
-    public LemmaEntity createLemmaEntity(SiteEntity siteEntity, String lemma){
+    public LemmaEntity createLemmaEntity(SiteEntity siteEntity, String lemma, int count){
         LemmaEntity lemmaEntity = new LemmaEntity();
         lemmaEntity.setSiteEntity(siteEntity);
         lemmaEntity.setLemma(lemma);
+        lemmaEntity.setFrequency(count);
         return lemmaEntity;
     }
     public IndexEntity createIndexEntity(PageEntity pageEntity, LemmaEntity lemmaEntity){

@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import searchengine.model.IndexEntity;
-import searchengine.model.LemmaEntity;
-import searchengine.model.PageEntity;
-import searchengine.model.SiteEntity;
+import searchengine.model.*;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,6 +24,19 @@ public class ManagerRepository {
     private final PageRepository pageRepository;
     private final SiteRepository siteRepository;
 
+    @Transactional
+    public List<SiteEntity> getAllSites(){
+       return siteRepository.findAll();
+    }
+    @Transactional(readOnly = true)
+    public Optional<SiteEntity> findSite(String url) {
+        try {
+            return siteRepository.findByUrl(url);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске сайта с url={}", url, e);
+            return Optional.empty();
+        }
+    }
     @Transactional(readOnly = true)
     public Optional<SiteEntity> findSite(int id) {
         try {
@@ -35,7 +48,29 @@ public class ManagerRepository {
     }
 
     @Transactional
-    public boolean deleteSite(int id) {
+    public boolean deleteSite(String url) {
+        try {
+            siteRepository.deleteByUrl(url);
+            return true;
+        } catch (Exception e) {
+            log.error("Ошибка при поиске сайта с url={}", url, e);
+            return false;
+        }
+    }
+    @Transactional
+    public boolean deleteSite(SiteEntity siteEntity) {
+        try {
+            siteRepository.delete(siteEntity);
+            log.info("Сайт с id={} удалён", siteEntity.getId());
+            return true;
+        } catch (Exception e) {
+            log.error("Ошибка при удалении сайта с id={}", siteEntity.getId(), e);
+            return false;
+        }
+    }
+
+    @Transactional
+    public boolean deleteSiteById(int id) {
         try {
             siteRepository.deleteById(id);
             log.info("Сайт с id={} удалён", id);
@@ -79,6 +114,17 @@ public class ManagerRepository {
             return false;
         }
     }
+    @Transactional
+    public boolean deletePage(PageEntity page) {
+        try {
+            pageRepository.delete(page);
+            log.info("Страница с id={} удалена", page.getId());
+            return true;
+        } catch (Exception e) {
+            log.error("Ошибка при удалении страницы с id={}", page.getId(), e);
+            return false;
+        }
+    }
 
     @Transactional
     public boolean savePage(PageEntity page) {
@@ -111,7 +157,15 @@ public class ManagerRepository {
             return Optional.empty();
         }
     }
-
+    @Transactional(readOnly = true)
+    public Optional<LemmaEntity> findLemma(String lemma) {
+        try {
+            return lemmaRepository.findByLemma(lemma);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске леммы с id={}", lemma, e);
+            return Optional.empty();
+        }
+    }
     @Transactional
     public boolean deleteLemma(int id) {
         try {

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import searchengine.dto.statistics.ApiResponse;
+import searchengine.dto.ApiResponse;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.IndexingServiceImpl;
 import searchengine.services.PageIndexingServiceImpl;
@@ -56,12 +56,12 @@ public class ApiController {
         if (!indexingService.isIndexing()) {
             log.warn("Попытка остановить индексацию, которая не запущена");
             return error("Индексация не запущена", HttpStatus.BAD_REQUEST);
-        }else {
+        }
             log.warn("попытка остановить индексацию");
             indexingService.stopIndexing();
             return ResponseEntity.ok(new ApiResponse(true, null));
         }
-    }
+
 
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
@@ -70,8 +70,18 @@ public class ApiController {
 
     @PostMapping("/indexPage")
     public ResponseEntity<ApiResponse> indexPage(@RequestParam("url") @NotBlank String url) {
-        //TODO реализовать метод добавления в индекс и обновляет страницу которой передан параметр
-    return null;
+        log.info("запущен метод: Post /api/indexPage");
+        log.info("Запуск индексации страницы {}", url);
+
+        boolean indexed =  pageIndexingService.indexPage(url);
+        if (!indexed) {
+            log.warn("Индексация страницы {} не выполнена", url);
+            return error("Данная страница находится за пределами сайтов, указанных в конфигурационном файле",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        log.info("Индексация страницы {} прошла успешно", url);
+        return ResponseEntity.ok(new ApiResponse(true, null));
     }
 
     @GetMapping("/search")

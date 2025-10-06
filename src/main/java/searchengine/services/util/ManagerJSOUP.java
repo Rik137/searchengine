@@ -8,8 +8,8 @@ import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import searchengine.dto.PageResponse;
 
 import java.io.IOException;
 import java.util.*;
@@ -30,60 +30,76 @@ public class ManagerJSOUP {
             return Collections.emptyList();
         }
 
-        // до 3 попыток с экспоненциальной задержкой + небольшой рандом
-        for (int i = 0; i < 3; i++) {
-            try {
-                if (i > 0) {
-                    long delay = 200L * (long) Math.pow(2, i - 1); // 200, 400, 800 ms
-                    Thread.sleep(delay);
-                }
-
-                doc = rickBotClient.fetchPage(url);
-                break;
-
-            } catch (IOException e) {
-                log.warn("Попытка {} не удалась для {}: {}", i + 1, url, e.getMessage());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.error("Задержка прервана для {}", url);
-            }
+        try {
+            doc = rickBotClient.fetchPage(url);
+        } catch (IOException | InterruptedException e) {
+            log.warn("Не удалось получить страницу {}: {}", url, e.getMessage());
         }
 
-        if (doc == null) {
-            log.error("Не удалось получить страницу после 3 попыток: {}", url);
-            return Collections.emptyList();
-        }
+        if (doc == null) return Collections.emptyList();
 
         Elements elements = doc.select("a[href]");
         for (Element el : elements) {
             String absUrl = el.absUrl("href").split("#")[0];
-            if (!absUrl.isBlank()) {
+            if (!absUrl.isBlank() && absUrl.startsWith(siteDomain)) {
                 links.add(absUrl);
             }
         }
-        return links.stream()
-                .filter(link -> link.startsWith(siteDomain))
-                .toList();
+        return links;
     }
 
 
-
-    public int getResponseCode(String url) {
+    public PageResponse fetchPageWithContent(String url) {
         try {
             Connection.Response response = Jsoup.connect(url)
                     .ignoreHttpErrors(true)
                     .execute();
-            return response.statusCode();
-        } catch (UnsupportedMimeTypeException e) {
-            log.debug("Пропускаем не-HTML ресурс: {}", url);
-            return -1;
+
+            int status = response.statusCode();
+            String body = null;
+            boolean isHtml = false;
+
+            String type = response.contentType();
+            if (type != null && type.contains("text/html") && status == 200) {
+                body = response.body();
+                isHtml = true;
+            }
+
+            return new PageResponse(status, body, isHtml);
+
         } catch (IOException e) {
-            log.warn("Ошибка при получении кода ответа {}: {}", url, e.getMessage());
-            return -1;
+            log.warn("Ошибка загрузки {}: {}", url, e.getMessage());
+            return new PageResponse(-1, null, false);
         }
     }
 
-    public String stripHtmlTags(String html){
-        return Jsoup.parse(html).text();
+
+
+
+    public String stripHtmlTags(String html) {
+        return html == null ? "" : Jsoup.parse(html).text();
     }
+
+
+    public String extractText(PageResponse response) {
+        if (response == null || response.getStatusCode() != 200 || response.getBody() == null) {
+            return null;
+        }
+        try {
+            return Jsoup.parse(response.getBody()).text();
+        } catch (Exception e) {
+            log.warn("Не удалось извлечь текст из ответа (статус {}): {}",
+                    response.getStatusCode(), e.getMessage());
+            return null;
+        }
+    }
+//    public String getTextFromPage(String url) {
+//        try {
+//            Document doc = rickBotClient.fetchPage(url); // используем уже существующий метод с retry
+//            return doc.text(); // извлекаем чистый текст
+//        } catch (IOException | InterruptedException e) {
+//            log.error("Не удалось получить текст страницы {}: {}", url, e.getMessage());
+//            return "";
+//        }
+//    }
 }

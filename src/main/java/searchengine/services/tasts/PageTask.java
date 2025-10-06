@@ -2,12 +2,13 @@ package searchengine.services.tasts;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import searchengine.services.ManagerRepository;
+import searchengine.dto.PageResponse;
+import searchengine.model.PageEntity;
+import searchengine.model.SiteEntity;
 import searchengine.services.util.IndexingContext;
-import searchengine.services.util.ManagerJSOUP;
-import searchengine.services.util.VisitedUrlStore;
 
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.RecursiveAction;
 @Slf4j
 @RequiredArgsConstructor
@@ -16,21 +17,42 @@ public class PageTask extends RecursiveAction {
     private final String url;
     private final String siteDomain;
     private final IndexingContext context;
+    private final SiteEntity siteEntity;
 
     @Override
     protected void compute() {
-        int statusCode = context.getManagerJSOUP().getResponseCode(url);
-        log.info("Парсинг страницы: {} | Код ответа: {}", url, statusCode);
-        System.out.println("URL: " + url + " | HTTP: " + statusCode);
-        if (statusCode == 200) {
-            List<PageTask> refs = context.getManagerJSOUP().getLinksFromPage(url, siteDomain).stream()
-                    .filter(context.getVisitedUrlStore()::markAsVisited) // <--- вот оно!
-                    .map(link -> new PageTask(link, siteDomain, context))
-                    .toList();
 
-            if (!refs.isEmpty()) {
-                invokeAll(refs);
+        if (context.shouldStop("PageTask-" + url)) return;
+
+        try {
+            PageResponse resp = context.getManagerJSOUP().fetchPageWithContent(url);
+            String htmlBody = (resp.getBody() != null) ? resp.getBody() : "<html><body></body></html>";
+            // сохраняем весь HTML в базе
+            PageEntity page = context.getEntityFactory().createPageEntity(
+                    siteEntity,
+                    url,
+                    resp.getStatusCode(),
+                    htmlBody
+            );
+            context.getManagerRepository().savePage(page);
+//            if (resp.isHtml() && resp.getBody() != null) {
+//                String textForLemma = context.getManagerJSOUP().stripHtmlTags(resp.getBody());
+//                // передаём textForLemma в лемматизатор
+//            }
+            if (resp.isHtml() && resp.getBody() != null) {
+                List<PageTask> refs = context.getManagerJSOUP()
+                        .getLinksFromPage(url, siteDomain)
+                        .stream()
+                        .filter(context.getVisitedUrlStore()::markAsVisited)
+                        .map(link -> new PageTask(link, siteDomain, context, siteEntity))
+                        .toList();
+
+                if (!refs.isEmpty()) invokeAll(refs);
             }
+
+        } catch (Exception e) {
+            log.error("Ошибка при обработке страницы {} возможно это изображение", url, e);
         }
+
     }
 }

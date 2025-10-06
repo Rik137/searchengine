@@ -1,8 +1,6 @@
 package searchengine.services;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
@@ -12,42 +10,32 @@ import searchengine.services.serviceinterfaces.IndexingService;
 @Setter
 @Service
 public class IndexingServiceImpl implements IndexingService {
-    //-------------------------------------------------------------------поля
+
     private  boolean statusIndexing = false;
     private final ManagerTasks managerTasks;
-    private final SitesList sitesList;
 
-    //------------------------------------------------------------------конструктор
     @Autowired
     public IndexingServiceImpl(ManagerTasks managerTasks, SitesList sitesList) {
         this.managerTasks = managerTasks;
-        this.sitesList = sitesList;
     }
 
-    //-------------------------------------------------------------------методы
     public boolean isIndexing(){
         return statusIndexing;
     }
-
-   //---------------------------------------------------------------------
 
     @Override
     public void startIndexing(){
         setStatusIndexing(true);
         animationPrepareIndexing();
-        managerTasks.startIndexTask(sitesList);
-
-
-
+        managerTasks.startIndexTask();
         setStatusIndexing(false);
     }
-    //-------------------------------------------------------------------
-    @Override
-    public void stopIndexing(){
 
-        //TODO реализовать метод
+    @Override
+    public void stopIndexing() {
+    managerTasks.stopIndexingTask();
+    setStatusIndexing(false);
     }
-    //-------------------------------------------------------------------
     private void animationPrepareIndexing() {
         log.info("НАЧАЛО ИНДЕКСАЦИИ");
 

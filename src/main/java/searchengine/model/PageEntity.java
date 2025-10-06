@@ -35,4 +35,5 @@ public class PageEntity {
 
     @OneToMany(mappedBy = "pageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexEntity> indexEntityList;
+
 }

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -35,9 +36,12 @@ public class SiteEntity {
     @Column(name = "name", nullable = false, columnDefinition = "VARCHAR(255)")
     private String name;
 
-    @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PageEntity> pageEntityList;
-    @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LemmaEntity> lemmaEntityList;
-
+//    @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<PageEntity> pageEntityList;
+@OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+private final List<PageEntity> pageEntityList = new ArrayList<>();
+//    @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<LemmaEntity> lemmaEntityList;
+@OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+private final List<LemmaEntity> lemmaEntityList = new ArrayList<>();
 }
