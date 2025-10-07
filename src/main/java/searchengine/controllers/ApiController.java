@@ -6,13 +6,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.ApiResponse;
+import searchengine.dto.SearchResponse;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.IndexingServiceImpl;
 import searchengine.services.PageIndexingServiceImpl;
 import searchengine.services.SearchServiceImpl;
 import searchengine.services.serviceinterfaces.StatisticsService;
-
+import javax.naming.directory.SearchResult;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -62,7 +65,6 @@ public class ApiController {
             return ResponseEntity.ok(new ApiResponse(true, null));
         }
 
-
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
         return ResponseEntity.ok(statisticsService.getStatistics());
@@ -84,10 +86,32 @@ public class ApiController {
         return ResponseEntity.ok(new ApiResponse(true, null));
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse> searchPage(){//дописать сигнатуру метода
-        //TODO реализовать метод поиска страницы по параметру запроса
-        return null;
+    @GetMapping("/api/search")
+    public ResponseEntity<ApiResponse> search(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String site,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "20") int limit) {
+        log.info("Запущен метод /api/search с параметрами: query={}, site={}, offset={}, limit={}",
+                query, site, offset, limit);
+        // 1. Проверяем вход
+        if (query == null || query.trim().isEmpty()) {
+            return error("Задан пустой поисковый запрос", HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+           List<SearchResult> results = searchService.search(query, site, offset, limit);
+            if (results .isEmpty()) {
+                return error("По запросу ничего не найдено", HttpStatus.NOT_FOUND);
+            }
+            return ResponseEntity.ok(new SearchResponse(true, results.size(), results));
+        }catch (IllegalStateException e) {
+            log.warn("Ошибка поиска: {}", e.getMessage());
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Внутренняя ошибка поиска", e);
+            return error("Внутренняя ошибка сервера", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private ResponseEntity<ApiResponse> error(String message, HttpStatus status) {

@@ -1,5 +1,8 @@
 package searchengine.services.serviceinterfaces;
 
+import javax.naming.directory.SearchResult;
+import java.util.List;
+
 public interface SearchService {
-    //TODO придумать метод
+   List<SearchResult> search (String query, String site, int offset, int limit) throws IllegalStateException;
 }
