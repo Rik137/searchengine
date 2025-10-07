@@ -1,11 +1,10 @@
 package searchengine.services;
 
-import liquibase.pro.packaged.S;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import searchengine.model.SiteEntity;
+import searchengine.model.Status;
 import searchengine.services.serviceinterfaces.SearchService;
 import searchengine.services.util.IndexingContext;
 
@@ -23,19 +22,34 @@ public class SearchServiceImpl implements SearchService {
     private final IndexingContext context;
 
 
-    public boolean isIndexReady(){
-
-        return false;
+    public boolean isIndexReady(String site){
+        if (site != null) {
+            if (!isSiteIndexed(site)) return false; // конкретный сайт не готов
+        } else {
+            if (!hasAnySites()) return false; // глобальная проверка
+        }
+        return  context.getManagerRepository().hasLemmas();
     }
 
     @Override
-    public List<SearchResult> search(String query, String site, int offset, int limit) throws IllegalStateException{
-        if (!isIndexReady()) {
+    public List<SearchResult> search(String query, String url, int offset, int limit) throws IllegalStateException{
+        if (!isIndexReady(url)) {
             throw new IllegalStateException("Индекс ещё не готов. Попробуйте позже.");
         }
         Map<String, Integer> lemmas = context.getLemmaProcessor().getLemmas(query);
+
         //исключить леммы которые встречаются на большом количестве страниц
         //сортировать получившийся список
         return Collections.emptyList();
+    }
+    private boolean isSiteIndexed(String url) {
+        return context.getManagerRepository()
+                .findSite(url)
+                .map(site -> site.getStatus() == Status.INDEXED)
+                .orElse(false);
+    }
+
+    private boolean hasAnySites(){
+        return context.getManagerRepository().hasSites();
     }
 }

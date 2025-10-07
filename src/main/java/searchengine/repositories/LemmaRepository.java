@@ -14,5 +14,7 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
     Optional<LemmaEntity> findByLemmaAndSiteId(@Param("lemma") String lemma, @Param("siteId") Integer siteId);
     @Query("SELECT l FROM LemmaEntity l WHERE l.lemma = :lemma AND l.siteEntity = :site")
     Optional<LemmaEntity> findByLemmaAndSite(@Param("lemma") String lemma, @Param("site") SiteEntity site);
+    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM LemmaEntity l")
+    boolean hasAnyLemmas();
 }
 

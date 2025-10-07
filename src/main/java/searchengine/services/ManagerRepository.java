@@ -10,7 +10,6 @@ import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +26,24 @@ public class ManagerRepository {
     @Transactional
     public List<SiteEntity> getAllSites(){
        return siteRepository.findAll();
+    }
+    @Transactional(readOnly = true)
+    public boolean hasLemmas() {
+        try {
+            return lemmaRepository.hasAnyLemmas();
+        } catch (Exception e) {
+            log.error("Ошибка при проверке наличия лемм", e);
+            return false;
+        }
+    }
+    @Transactional(readOnly = true)
+    public boolean hasSites() {
+        try {
+            return siteRepository.hasAnySites();
+        } catch (Exception e) {
+            log.error("Ошибка при проверке наличия сайтов", e);
+            return false;
+        }
     }
     @Transactional(readOnly = true)
     public Optional<SiteEntity> findSite(String url) {
