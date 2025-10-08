@@ -10,6 +10,7 @@ import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -164,7 +165,15 @@ public class ManagerRepository {
             return Optional.empty();
         }
     }
-
+    @Transactional(readOnly = true)
+    public List<LemmaEntity> findAllLemmasBySite(SiteEntity site) {
+        try {
+            return lemmaRepository.findAllBySite(site);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске лемм на сайте с id={}", site.getId(), e);
+            return Collections.emptyList();
+        }
+    }
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(int id) {
         try {
@@ -193,15 +202,18 @@ public class ManagerRepository {
         }
     }
 
-    @Transactional(readOnly = true)
-    public Optional<LemmaEntity> findLemma(String lemma) {
-        try {
-            return lemmaRepository.findByLemma(lemma);
-        } catch (Exception e) {
-            log.error("Ошибка при поиске леммы с id={}", lemma, e);
-            return Optional.empty();
-        }
-    }
+
+
+
+//    @Transactional(readOnly = true)
+//    public Optional<LemmaEntity> findLemma(String lemma) {
+//        try {
+//            return lemmaRepository.findByLemma(lemma);
+//        } catch (Exception e) {
+//            log.error("Ошибка при поиске леммы с id={}", lemma, e);
+//            return Optional.empty();
+//        }
+//    }
     @Transactional
     public boolean deleteLemma(int id) {
         try {
@@ -259,5 +271,69 @@ public class ManagerRepository {
             return false;
         }
     }
+    @Transactional(readOnly = true)
+    public List<LemmaEntity> findLemmas(List<String> names) {
+        try {
+            return lemmaRepository.findByLemmaIn(names);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске лемм {}", names, e);
+            return Collections.emptyList();
+        }
+    }
+    @Transactional(readOnly = true)
+    public List<PageEntity> getAllPagesBySite (SiteEntity site) {
+        try {
+            return pageRepository.findAllBySiteEntity(site);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске страниц на сайте {}", site.getId(), e);
+            return Collections.emptyList();
+        }
+    }
+    @Transactional(readOnly = true)
+    public int getCountPagesBySite (SiteEntity site) {
+        try {
+            return pageRepository.countBySiteId(site.getId());
+        } catch (Exception e) {
+            log.error("Ошибка при поиске страниц на сайте {}", site.getId(), e);
+            return 0;
+        }
+    }
+    @Transactional(readOnly = true)
+    public List<LemmaEntity> findLemmas(List<String> names, String siteUrl) {
+        try {
+            return lemmaRepository.findByLemmaInAndSiteEntity_Url(names, siteUrl);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске лемм {} на сайте {}", names, siteUrl, e);
+            return Collections.emptyList();
+        }
+    }
+    @Transactional(readOnly = true)
+    public int getCountPagesWhereLemma (LemmaEntity lemma, SiteEntity site) {
+        try {
+            return indexRepository.countPagesContainingLemma(lemma, site);
+        } catch (Exception e) {
+            log.error("Ошибка при подщёте страниц на сайте {}", site.getId(), e);
+            return 0;
+        }
+    }
+    @Transactional(readOnly = true)
+    public List<IndexEntity> getAllIndexesBySite(LemmaEntity lemma, SiteEntity site) {
+        try {
+            return indexRepository.findIndexesByLemmaAndSite(lemma, site);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске индексов на сайте c id={}", site.getId(), e);
+            return Collections.emptyList();
+        }
+    }
 
+    @Transactional
+    public boolean saveIndex( List<IndexEntity> indexs) {
+        try {
+            indexRepository.saveAll(indexs);
+            return true;
+        } catch (Exception e) {
+            log.error("Ошибка при сохранении индексов", e);
+            return false;
+        }
+    }
 }

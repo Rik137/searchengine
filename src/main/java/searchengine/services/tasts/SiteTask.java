@@ -54,6 +54,9 @@ public class SiteTask extends RecursiveAction {
                 siteEntity.setLastError(null);
                 siteEntity.setStatusTime(LocalDateTime.now());
                 context.getManagerRepository().saveSite(siteEntity);
+                log.info("идет подсчет веса лемм");
+                context.getLemmaFrequencyService().recalculateRankForAllSites(siteEntity);
+                log.info("подсчет веса лемм завершен");
             }
 
         }catch (Exception e) {
@@ -67,4 +70,5 @@ public class SiteTask extends RecursiveAction {
         siteEntity.setStatusTime(LocalDateTime.now());
         context.getManagerRepository().saveSite(siteEntity);
     }
+
 }

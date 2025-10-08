@@ -31,10 +31,11 @@ public class EntityFactory {
         lemmaEntity.setFrequency(count);
         return lemmaEntity;
     }
-    public IndexEntity createIndexEntity(PageEntity pageEntity, LemmaEntity lemmaEntity){
+    public IndexEntity createIndexEntity(PageEntity pageEntity, LemmaEntity lemmaEntity, float rank){
         IndexEntity indexEntity = new IndexEntity();
         indexEntity.setPageEntity(pageEntity);
         indexEntity.setLemmaEntity(lemmaEntity);
+        indexEntity.setRank(rank);
         return indexEntity;
     }
 }

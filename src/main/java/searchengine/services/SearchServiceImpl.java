@@ -2,6 +2,7 @@ package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.SortComparator;
 import org.springframework.stereotype.Service;
 import searchengine.model.SiteEntity;
 import searchengine.model.Status;
@@ -36,12 +37,9 @@ public class SearchServiceImpl implements SearchService {
         if (!isIndexReady(url)) {
             throw new IllegalStateException("Индекс ещё не готов. Попробуйте позже.");
         }
-        Map<String, Integer> lemmas = context.getLemmaProcessor().getLemmas(query);
-
-        //исключить леммы которые встречаются на большом количестве страниц
-        //сортировать получившийся список
-        return Collections.emptyList();
+          return context.getLemmaFrequencyService().findSearchResult(query, url, offset, limit);
     }
+
     private boolean isSiteIndexed(String url) {
         return context.getManagerRepository()
                 .findSite(url)
