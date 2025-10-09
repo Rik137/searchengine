@@ -37,7 +37,7 @@ public class SearchServiceImpl implements SearchService {
         if (!isIndexReady(url)) {
             throw new IllegalStateException("Индекс ещё не готов. Попробуйте позже.");
         }
-          return context.getLemmaFrequencyService().findSearchResult(query, url, offset, limit);
+          return context.getLemmaFrequencyService().searchResult(query, url, offset, limit);
     }
 
     private boolean isSiteIndexed(String url) {

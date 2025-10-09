@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import searchengine.services.util.LemmaFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -57,6 +54,11 @@ public class LemmaProcessor {
     public Map<String, Integer> getLemmas(String text) {
         List<String> lemmas = generateLemmas(text);
         return countLemmas(lemmas);
+    }
+    public List<String> getLemmasForSearch(String text) {
+        return generateLemmas(text).stream()
+                .distinct() // убирает дубликаты
+                .toList();  // требует Java 16+
     }
 }
 
