@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import searchengine.dto.SearchResult;
 import searchengine.model.*;
 import searchengine.repositories.LemmaRepository;
 import searchengine.services.util.EntityFactory;
+import searchengine.services.util.SearchBuilder;
 
-import javax.naming.directory.SearchResult;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -108,27 +109,54 @@ public class LemmaFrequencyService {
         }
     }
 
-    public List<SearchResult> searchResult(String query, String url, int offset, int limit) {
-        List<String> lemmas = lemmaProcessor.getLemmasForSearch(query);
-        if (lemmas.isEmpty()) {
-            return List.of();
-        }
-        List<LemmaEntity> lemmasEntity = getLemmaFromDataBase(lemmas, url);
-        if (lemmasEntity.isEmpty()) return List.of();
-        List<IndexEntity> indexes = findIndexesForAllLemmas(filterAndSortLemmas(calculateSiteRank(lemmasEntity)));
-        List<PageEntity> pages = calcRelativeRank(calcAbsoluteRank(indexes));
-
-
-//TODO доделай метод
-
-
-        return List.of();
-    }
 
     private List<LemmaEntity> getLemmaFromDataBase(List<String> lemmas, String url) {
         return (url == null || url.isBlank())
                 ? managerRepository.findLemmas(lemmas)
                 : managerRepository.findLemmas(lemmas, url);
+    }
+
+    public List<SearchResult> searchResult(String query, String url, int offset, int limit) {
+        log.info("Поиск запроса '{}' по сайту '{}'", query, url);
+
+        // 1️⃣ Получаем леммы для поиска
+        List<String> lemmas = lemmaProcessor.getLemmasForSearch(query);
+        if (lemmas.isEmpty()) {
+            log.warn("Не найдено лемм для запроса '{}'", query);
+            return List.of();
+        }
+
+        // 2️⃣ Извлекаем леммы из БД (фильтруем по сайту, если указан)
+        List<LemmaEntity> lemmasEntity = getLemmaFromDataBase(lemmas, url);
+        if (lemmasEntity.isEmpty()) {
+            log.warn("Не найдено лемм в БД для запроса '{}'", query);
+            return List.of();
+        }
+
+        // 3️⃣ Отфильтровываем “шумные” леммы (частые)
+        List<LemmaEntity> filtered = calculateSiteRank(lemmasEntity);
+        if (filtered.isEmpty()) {
+            log.warn("После фильтрации не осталось релевантных лемм");
+            return List.of();
+        }
+
+        // 4️⃣ Находим пересечение страниц, где встречаются все леммы
+        List<IndexEntity> indexes = findIndexesForAllLemmas(filtered);
+        if (indexes.isEmpty()) {
+            log.info("Поиск не дал результатов — пересечение пусто");
+            return List.of();
+        }
+
+        // 5️⃣ Считаем абсолютный и относительный ранг
+        Map<PageEntity, Float> absolute = calcAbsoluteRank(indexes);
+        Map<PageEntity, Float> relative = calcRelativeRank(absolute);
+
+        // 6️⃣ Собираем результаты
+        SearchBuilder builder = new SearchBuilder();
+        List<SearchResult> results = builder.build(relative, offset, limit, query);
+
+        log.info("По запросу '{}' найдено {} результатов", query, results.size());
+        return results;
     }
 
     public List<LemmaEntity> calculateSiteRank(List<LemmaEntity> lemmas) {
@@ -171,21 +199,26 @@ public class LemmaFrequencyService {
             PageEntity page = index.getPageEntity();
             pageRanks.merge(page, index.getRank(), Float::sum);
         }
+
+        log.debug("Вычислена абсолютная релевантность для {} страниц", pageRanks.size());
         return pageRanks;
     }
 
-    private List<PageEntity> calcRelativeRank(Map<PageEntity, Float> pages) {
-        if (pages.isEmpty()) {
-            return List.of();
+    private Map<PageEntity, Float> calcRelativeRank(Map<PageEntity, Float> absoluteRanks) {
+        if (absoluteRanks.isEmpty()) {
+            return Map.of();
         }
-        // Находим максимальную абсолютную релевантность
-        float maxRank = pages.values().stream()
+
+        float maxRank = absoluteRanks.values().stream()
                 .max(Float::compare)
-                .orElse(1.0f); // защита от деления на ноль
-        return pages.entrySet().stream()
-                .sorted((e1, e2) -> Float.compare(e2.getValue() / maxRank, e1.getValue() / maxRank))
-                .map(Map.Entry::getKey)
-                .toList();
+                .orElse(1.0f);
+
+        Map<PageEntity, Float> relativeRanks = absoluteRanks.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        e -> e.getValue() / maxRank));
+
+        log.debug("Рассчитана относительная релевантность. Максимальный ранг = {}", maxRank);
+        return relativeRanks;
     }
 }
 

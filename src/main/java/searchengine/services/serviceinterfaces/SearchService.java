@@ -1,6 +1,7 @@
 package searchengine.services.serviceinterfaces;
 
-import javax.naming.directory.SearchResult;
+import searchengine.dto.SearchResult;
+
 import java.util.List;
 
 public interface SearchService {

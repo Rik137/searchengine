@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import javax.naming.directory.SearchResult;
 import java.util.List;
+
 
 @Data
 @NoArgsConstructor

@@ -2,18 +2,13 @@ package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.SortComparator;
 import org.springframework.stereotype.Service;
-import searchengine.model.SiteEntity;
+import searchengine.dto.SearchResult;
 import searchengine.model.Status;
 import searchengine.services.serviceinterfaces.SearchService;
 import searchengine.services.util.IndexingContext;
 
-import javax.naming.directory.SearchResult;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +32,7 @@ public class SearchServiceImpl implements SearchService {
         if (!isIndexReady(url)) {
             throw new IllegalStateException("Индекс ещё не готов. Попробуйте позже.");
         }
+          log.info("Начат поиск по запросу '{}' для сайта '{}'", query, url);
           return context.getLemmaFrequencyService().searchResult(query, url, offset, limit);
     }
 

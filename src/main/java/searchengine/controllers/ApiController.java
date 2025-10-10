@@ -5,14 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import searchengine.dto.ApiResponse;
 import searchengine.dto.SearchResponse;
+import searchengine.dto.SearchResult;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.IndexingServiceImpl;
 import searchengine.services.PageIndexingServiceImpl;
 import searchengine.services.SearchServiceImpl;
 import searchengine.services.serviceinterfaces.StatisticsService;
-import javax.naming.directory.SearchResult;
+
+import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +44,7 @@ public class ApiController {
     @GetMapping("/startIndexing")
     public ResponseEntity<ApiResponse> startIndexing() {
 
-        log.info("запущен метод: GET /api/startIndexing");
+        log.info("запущен метод: GET /startIndexing");
 
         if (indexingService.isIndexing()) {
             log.warn("Попытка запустить индексацию при уже запущенном процессе");
@@ -54,7 +57,7 @@ public class ApiController {
 
     @GetMapping("/stopIndexing")
     public ResponseEntity<ApiResponse> stopIndexing() {
-        log.info("запущен метод: GET /api/stopIndexing");
+        log.info("запущен метод: GET /stopIndexing");
 
         if (!indexingService.isIndexing()) {
             log.warn("Попытка остановить индексацию, которая не запущена");
@@ -72,7 +75,7 @@ public class ApiController {
 
     @PostMapping("/indexPage")
     public ResponseEntity<ApiResponse> indexPage(@RequestParam("url") @NotBlank String url) {
-        log.info("запущен метод: Post /api/indexPage");
+        log.info("запущен метод: Post /indexPage");
         log.info("Запуск индексации страницы {}", url);
 
         boolean indexed =  pageIndexingService.indexPage(url);
@@ -86,7 +89,7 @@ public class ApiController {
         return ResponseEntity.ok(new ApiResponse(true, null));
     }
 
-    @GetMapping("/api/search")
+    @GetMapping("/search")
     public ResponseEntity<ApiResponse> search(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String site,
@@ -104,6 +107,7 @@ public class ApiController {
             if (results .isEmpty()) {
                 return error("По запросу ничего не найдено", HttpStatus.NOT_FOUND);
             }
+            log.info("Поиск завершён: найдено {} результатов", results.size());
             return ResponseEntity.ok(new SearchResponse(true, results.size(), results));
         }catch (IllegalStateException e) {
             log.warn("Ошибка поиска: {}", e.getMessage());
@@ -116,5 +120,13 @@ public class ApiController {
 
     private ResponseEntity<ApiResponse> error(String message, HttpStatus status) {
         return ResponseEntity.status(status).body(new ApiResponse(false, message));
+    }
+    @Autowired
+    private RequestMappingHandlerMapping handlerMapping;
+
+    @PostConstruct
+    public void printEndpoints() {
+        handlerMapping.getHandlerMethods()
+                .forEach((key, value) -> System.out.println(key + " -> " + value));
     }
 }
