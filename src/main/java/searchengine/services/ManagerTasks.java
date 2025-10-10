@@ -6,13 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import searchengine.model.SiteEntity;
 import searchengine.model.Status;
-import searchengine.services.tasts.SitesTask;
+import searchengine.services.tasks.SitesTask;
 import searchengine.services.util.IndexingContext;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 

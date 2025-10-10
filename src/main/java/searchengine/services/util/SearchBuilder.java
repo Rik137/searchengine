@@ -1,28 +1,24 @@
 package searchengine.services.util;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import searchengine.dto.SearchResult;
+import searchengine.dto.search.SearchResult;
 import searchengine.model.PageEntity;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 @NoArgsConstructor
 public class SearchBuilder {
 
-    private static final int SNIPPET_RADIUS = 100; // длина до и после совпадения
+    private static final int SNIPPET_RADIUS = 100;
     private static final int SNIPPET_MAX_LENGTH = 250;
+    private static final int AVG_LINE_LENGTH = 80; // среднее количество символов на строку
+    private static final int SNIPPET_LINES = 3;    // ~3 строки
 
     public List<SearchResult> build(Map<PageEntity, Float> rankedPages, int offset, int limit, String query) {
-        if (rankedPages.isEmpty()) {
-            return List.of();
-        }
+        if (rankedPages.isEmpty()) return List.of();
 
         List<String> queryWords = Arrays.stream(query.toLowerCase().split("\\s+"))
                 .filter(s -> s.length() > 1)
@@ -31,110 +27,106 @@ public class SearchBuilder {
         return rankedPages.entrySet().stream()
                 .skip(offset)
                 .limit(limit)
-                .map(entry -> {
-                    PageEntity page = entry.getKey();
-                    float relevance = entry.getValue();
-
-                    String title = extractTitle(page);
-                    String text = extractText(page);
-                    String snippet = buildSnippet(text, queryWords);
-                   // String fullUrl = page.getSiteEntity().getUrl() + page.getPath();
-                 //   String rawPath = page.getPath();
-                  //  String siteUrl = page.getSiteEntity().getUrl();
-                    String siteUrl = page.getSiteEntity() != null && page.getSiteEntity().getUrl() != null
-                            ? page.getSiteEntity().getUrl()
-                            : "";
-
-                    String path = page.getPath() != null ? page.getPath() : "";
-// Если path уже полный URL, используем его напрямую
-                   String fullUrl;
-                    if (siteUrl.isEmpty() && path.isEmpty()) {
-                        fullUrl = "#"; // ссылка-заглушка
-                    } else if (!siteUrl.isEmpty() && !path.isEmpty()) {
-                        // если path уже абсолютный URL, не добавляем siteUrl
-                        if (path.startsWith("http://") || path.startsWith("https://")) {
-                            fullUrl = path;
-                        } else {
-                            fullUrl = siteUrl.endsWith("/") ? siteUrl + path : siteUrl + "/" + path;
-                        }
-                    } else {
-                        fullUrl = siteUrl + path; // один из них непустой
-                    }
-
-                    System.out.println(fullUrl);
-                    SearchResult result = new SearchResult(
-                          fullUrl,
-                            title,
-                            snippet,
-                            relevance
-                    );
-                    log.info("Страница {}: siteUrl='{}', path='{}', fullUrl='{}'",
-                            page.getId(), siteUrl, path, fullUrl);
-
-                    return result;
-                })
+                .map(entry -> createSearchResult(entry.getKey(), entry.getValue(), queryWords))
                 .toList();
     }
 
-    private String extractTitle(PageEntity page) {
-        try {
-            Document doc = Jsoup.parse(page.getContent());
-            return doc.title().isBlank() ? "(без заголовка)" : doc.title();
-        } catch (Exception e) {
-            log.warn("Ошибка извлечения заголовка для страницы {}", page.getPath(), e);
-            return "(ошибка извлечения заголовка)";
-        }
-    }
 
-    private String extractText(PageEntity page) {
-        try {
-            Document doc = Jsoup.parse(page.getContent());
-            return doc.text();
-        } catch (Exception e) {
-            log.warn("Ошибка очистки HTML для страницы {}", page.getPath(), e);
-            return "";
-        }
+
+    // простая очистка тегов HTML
+    private String cleanHtmlTags(String content) {
+        return content.replaceAll("<[^>]*>", " ").replaceAll("\\s+", " ").trim();
     }
 
     private String buildSnippet(String text, List<String> queryWords) {
-        if (text == null || text.isBlank()) return "";
+        if (text.isBlank()) return "";
 
-        String lower = text.toLowerCase();
+        String snippet = getString(text, queryWords);
+
+        // Подсветка всех слов одной регуляркой
+        if (!queryWords.isEmpty()) {
+            Pattern pattern = Pattern.compile("\\b(" + String.join("|", queryWords) + ")\\b", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(snippet);
+            snippet = matcher.replaceAll("<b>$1</b>");
+        }
+
+        // Ограничение по символам (~3 строки)
+        int maxLen = AVG_LINE_LENGTH * SNIPPET_LINES;
+        snippet = snippet.length() > maxLen ? snippet.substring(0, maxLen) + "..." : snippet;
+
+        return snippet;
+    }
+
+    private static String getString(String text, List<String> queryWords) {
+        String lowerText = text.toLowerCase();
         int matchIndex = -1;
-        String matchedWord = null;
 
         for (String word : queryWords) {
-            int index = lower.indexOf(word);
-            if (index >= 0) {
-                matchIndex = index;
-                matchedWord = word;
+            int idx = lowerText.indexOf(word);
+            if (idx >= 0) {
+                matchIndex = idx;
                 break;
             }
         }
 
-        if (matchIndex == -1) {
-            // ничего не найдено — берём начало текста
-            String snippet = text.substring(0, Math.min(SNIPPET_MAX_LENGTH, text.length()));
-            return escapeAndTrim(snippet);
-        }
+        int start = matchIndex == -1 ? 0 : Math.max(0, matchIndex - SNIPPET_RADIUS);
+        int end = matchIndex == -1
+                ? Math.min(SNIPPET_MAX_LENGTH, text.length())
+                : Math.min(text.length(), matchIndex + SNIPPET_RADIUS);
 
-        int start = Math.max(0, matchIndex - SNIPPET_RADIUS);
-        int end = Math.min(text.length(), matchIndex + SNIPPET_RADIUS);
-        String snippet = text.substring(start, end);
-
-        // выделяем <b> совпадения
-        for (String word : queryWords) {
-            snippet = snippet.replaceAll("(?i)" + Pattern.quote(word), "<b>$0</b>");
-        }
-
-        return escapeAndTrim(snippet);
+        return text.substring(start, end);
     }
 
-    private String escapeAndTrim(String snippet) {
-        snippet = snippet.replaceAll("\\s+", " ").trim();
-        if (snippet.length() > SNIPPET_MAX_LENGTH) {
-            snippet = snippet.substring(0, SNIPPET_MAX_LENGTH) + "...";
-        }
-        return snippet;
+    private SearchResult createSearchResult(PageEntity page, float relevance, List<String> queryWords) {
+        String siteUrl = Optional.ofNullable(page.getSiteEntity())
+                .map(s -> s.getUrl())
+                .orElse("");
+
+        String siteName = Optional.ofNullable(page.getSiteEntity())
+                .map(s -> s.getName())
+                .orElse("(без имени)");
+
+        String pagePath = Optional.ofNullable(page.getPath()).orElse("");
+        String uri = pagePath.startsWith("http") ? extractRelativePath(pagePath, siteUrl) : pagePath;
+
+        String content = Optional.ofNullable(page.getContent()).orElse("");
+
+        // Сначала извлекаем заголовок
+        String title = extractTitleFromHtml(content);
+
+        // Потом чистим текст для сниппета
+        String text = cleanHtmlTags(content);
+
+        String snippet = buildSnippet(text, queryWords);
+
+        return new SearchResult(siteUrl, siteName, uri, title, snippet, relevance);
     }
+
+    // Извлечение <title> из HTML без полного парсинга Jsoup
+    private String extractTitleFromHtml(String html) {
+        if (html == null || html.isBlank()) return "(без заголовка)";
+        Pattern pattern = Pattern.compile("<title>(.*?)</title>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(html);
+        if (matcher.find()) {
+            String title = matcher.group(1).replaceAll("\\s+", " ").trim();
+            return title.isEmpty() ? "(без заголовка)" : title;
+        }
+        return "(без заголовка)";
+    }
+    private String extractRelativePath(String fullUrl, String siteUrl) {
+        try {
+            if (fullUrl.startsWith(siteUrl)) {
+                String relative = fullUrl.substring(siteUrl.length());
+                // добавляем слэш, если его нет
+                return relative.isEmpty() ? "/" : (relative.startsWith("/") ? relative : "/" + relative);
+            }
+            return "/";
+        } catch (Exception e) {
+            log.warn("Не удалось извлечь относительный путь из {}", fullUrl, e);
+            return "/";
+        }
+    }
+
+
 }
+

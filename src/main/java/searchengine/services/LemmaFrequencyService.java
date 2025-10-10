@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import searchengine.dto.SearchResult;
+import searchengine.dto.search.SearchResult;
 import searchengine.model.*;
 import searchengine.repositories.LemmaRepository;
 import searchengine.services.util.EntityFactory;
@@ -121,6 +121,7 @@ public class LemmaFrequencyService {
 
         // 1️⃣ Получаем леммы для поиска
         List<String> lemmas = lemmaProcessor.getLemmasForSearch(query);
+        System.out.println("леммы для запроса " + lemmas);
         if (lemmas.isEmpty()) {
             log.warn("Не найдено лемм для запроса '{}'", query);
             return List.of();
@@ -133,15 +134,24 @@ public class LemmaFrequencyService {
             return List.of();
         }
 
-        // 3️⃣ Отфильтровываем “шумные” леммы (частые)
-        List<LemmaEntity> filtered = calculateSiteRank(lemmasEntity);
+        // 3️⃣ Фильтруем по частоте и сортируем по возрастанию
+        List<LemmaEntity> filtered = lemmasEntity.stream()
+                .filter(lemma -> {
+                    float totalPages = managerRepository.getCountPagesBySite(lemma.getSiteEntity());
+                    float onePercent = totalPages / 100.0f;
+                    float lemmaPercent = lemma.getIndexEntityList().size() / onePercent;
+                    return lemmaPercent <= PERCENT;
+                })
+                .sorted(Comparator.comparingInt(LemmaEntity::getFrequency))
+                .toList();
+
         if (filtered.isEmpty()) {
             log.warn("После фильтрации не осталось релевантных лемм");
             return List.of();
         }
 
-        // 4️⃣ Находим пересечение страниц, где встречаются все леммы
-        List<IndexEntity> indexes = findIndexesForAllLemmas(filtered);
+        // 4️⃣ Находим индексы страниц для лемм
+        List<IndexEntity> indexes = findIndexesForAllLemmas(filtered, url);
         if (indexes.isEmpty()) {
             log.info("Поиск не дал результатов — пересечение пусто");
             return List.of();
@@ -149,7 +159,7 @@ public class LemmaFrequencyService {
 
         // 5️⃣ Считаем абсолютный и относительный ранг
         Map<PageEntity, Float> absolute = calcAbsoluteRank(indexes);
-        Map<PageEntity, Float> relative = calcRelativeRank(absolute);
+        Map<PageEntity, Float> relative = calcRelativeRank(absolute, indexes, lemmas);
 
         // 6️⃣ Собираем результаты
         SearchBuilder builder = new SearchBuilder();
@@ -159,66 +169,74 @@ public class LemmaFrequencyService {
         return results;
     }
 
-    public List<LemmaEntity> calculateSiteRank(List<LemmaEntity> lemmas) {
-        return lemmas.stream()
-                .filter(lemma -> {
-                    float totalPages = managerRepository.getCountPagesBySite(lemma.getSiteEntity());
-                    float onePercent = totalPages / 100.0f;
-                    float lemmaPercent = lemma.getIndexEntityList().size() / onePercent;
-                    return lemmaPercent <= PERCENT; // фильтр по весу
-                })
-                .sorted(Comparator.comparingInt(LemmaEntity::getFrequency)) // от меньшего к большему
-                .toList(); // Java 16+; если ниже — .collect(Collectors.toList())
-    }
 
-    private List<LemmaEntity> filterAndSortLemmas(List<LemmaEntity> lemmas) {
-        return lemmas.stream().sorted(Comparator.comparingInt(LemmaEntity::getFrequency)).collect(Collectors.toList());
-    }
 
-    private List<IndexEntity> findIndexesForAllLemmas(List<LemmaEntity> lemmas) {
+
+    private List<IndexEntity> findIndexesForAllLemmas(List<LemmaEntity> lemmas, String url) {
         if (lemmas.isEmpty()) return List.of();
-        // 1️⃣ Начинаем с индексов первой леммы
-        List<IndexEntity> baseIndexes = new ArrayList<>(lemmas.get(0).getIndexEntityList());
 
-        // 2️⃣ Пересекаем по страницам для всех последующих лемм
-        for (int i = 1; i < lemmas.size(); i++) {
-            Set<Integer> pagesWithCurrentLemma = lemmas.get(i).getIndexEntityList().stream()
-                    .map(idx -> idx.getPageEntity().getId())
-                    .collect(Collectors.toSet());
-            // оставляем только те индексы, где страница присутствует и в текущей лемме
-            baseIndexes = baseIndexes.stream()
-                    .filter(idx -> pagesWithCurrentLemma.contains(idx.getPageEntity().getId()))
+        if (url != null && !url.isBlank()) {
+            // Пересечение страниц для конкретного сайта
+            List<IndexEntity> baseIndexes = new ArrayList<>(lemmas.get(0).getIndexEntityList());
+            for (int i = 1; i < lemmas.size(); i++) {
+                Set<Integer> pagesWithCurrentLemma = lemmas.get(i).getIndexEntityList().stream()
+                        .map(idx -> idx.getPageEntity().getId())
+                        .collect(Collectors.toSet());
+                baseIndexes = baseIndexes.stream()
+                        .filter(idx -> pagesWithCurrentLemma.contains(idx.getPageEntity().getId()))
+                        .toList();
+            }
+            return baseIndexes;
+        } else {
+            // Объединение всех страниц по леммам для поиска по всем сайтам
+            return lemmas.stream()
+                    .flatMap(l -> l.getIndexEntityList().stream())
+                    .distinct() // убираем дубликаты
                     .toList();
         }
-        return baseIndexes;
     }
 
     private Map<PageEntity, Float> calcAbsoluteRank(List<IndexEntity> indexes) {
         Map<PageEntity, Float> pageRanks = new HashMap<>();
-        for (IndexEntity index : indexes) {
-            PageEntity page = index.getPageEntity();
-            pageRanks.merge(page, index.getRank(), Float::sum);
+        for (IndexEntity idx : indexes) {
+            pageRanks.merge(idx.getPageEntity(), idx.getRank(), Float::sum);
         }
-
-        log.debug("Вычислена абсолютная релевантность для {} страниц", pageRanks.size());
+        log.info("Вычислена абсолютная релевантность для {} страниц", pageRanks.size());
         return pageRanks;
     }
+    private Map<PageEntity, Float> calcRelativeRank(Map<PageEntity, Float> absoluteRanks, List<IndexEntity> indexes, List<String> queryLemmas) {
+        if (absoluteRanks.isEmpty()) return Map.of();
 
-    private Map<PageEntity, Float> calcRelativeRank(Map<PageEntity, Float> absoluteRanks) {
-        if (absoluteRanks.isEmpty()) {
-            return Map.of();
+        // Количество совпадений лемм на странице
+        Map<PageEntity, Integer> lemmaMatches = new HashMap<>();
+        for (IndexEntity idx : indexes) {
+            lemmaMatches.merge(idx.getPageEntity(), 1, Integer::sum);
         }
 
-        float maxRank = absoluteRanks.values().stream()
-                .max(Float::compare)
-                .orElse(1.0f);
+        float maxRank = absoluteRanks.values().stream().max(Float::compare).orElse(1.0f);
+        Map<PageEntity, Float> relativeRanks = new HashMap<>();
 
-        Map<PageEntity, Float> relativeRanks = absoluteRanks.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        e -> e.getValue() / maxRank));
+        for (Map.Entry<PageEntity, Float> entry : absoluteRanks.entrySet()) {
+            PageEntity page = entry.getKey();
+            float base = entry.getValue() / maxRank;
 
-        log.debug("Рассчитана относительная релевантность. Максимальный ранг = {}", maxRank);
-        return relativeRanks;
+            // Вес увеличивается пропорционально совпадению лемм
+            int matchCount = lemmaMatches.getOrDefault(page, 0);
+            float weight = 1.0f + (matchCount / (float) queryLemmas.size());
+            relativeRanks.put(page, base * weight);
+        }
+
+        // Сортировка по убыванию
+        return relativeRanks.entrySet().stream()
+                .sorted(Map.Entry.<PageEntity, Float>comparingByValue().reversed())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> b,
+                        LinkedHashMap::new
+                ));
     }
+
+
 }
 

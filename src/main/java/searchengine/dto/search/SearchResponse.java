@@ -1,9 +1,10 @@
-package searchengine.dto;
+package searchengine.dto.search;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import searchengine.dto.ApiResponse;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class SearchResponse extends ApiResponse{
+public class SearchResponse extends ApiResponse {
     private int count;
     private List<SearchResult> data;
 

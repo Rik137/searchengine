@@ -1,6 +1,6 @@
 package searchengine.services.serviceinterfaces;
 
-import searchengine.dto.SearchResult;
+import searchengine.dto.search.SearchResult;
 
 import java.util.List;
 

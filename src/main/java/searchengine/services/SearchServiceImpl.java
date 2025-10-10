@@ -3,7 +3,7 @@ package searchengine.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import searchengine.dto.SearchResult;
+import searchengine.dto.search.SearchResult;
 import searchengine.model.Status;
 import searchengine.services.serviceinterfaces.SearchService;
 import searchengine.services.util.IndexingContext;
@@ -24,6 +24,7 @@ public class SearchServiceImpl implements SearchService {
         } else {
             if (!hasAnySites()) return false; // глобальная проверка
         }
+        log.info("сервис готов к поиску");
         return  context.getManagerRepository().hasLemmas();
     }
 

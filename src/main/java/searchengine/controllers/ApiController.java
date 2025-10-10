@@ -5,20 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import searchengine.dto.ApiResponse;
-import searchengine.dto.SearchResponse;
-import searchengine.dto.SearchResult;
+import searchengine.dto.search.SearchResponse;
+import searchengine.dto.search.SearchResult;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.IndexingServiceImpl;
 import searchengine.services.PageIndexingServiceImpl;
 import searchengine.services.SearchServiceImpl;
 import searchengine.services.serviceinterfaces.StatisticsService;
 
-import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -108,7 +105,9 @@ public class ApiController {
                 return error("По запросу ничего не найдено", HttpStatus.NOT_FOUND);
             }
             log.info("Поиск завершён: найдено {} результатов", results.size());
+
             return ResponseEntity.ok(new SearchResponse(true, results.size(), results));
+
         }catch (IllegalStateException e) {
             log.warn("Ошибка поиска: {}", e.getMessage());
             return error(e.getMessage(), HttpStatus.BAD_REQUEST);

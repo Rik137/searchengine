@@ -1,4 +1,4 @@
-package searchengine.services.tasts;
+package searchengine.services.tasks;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
