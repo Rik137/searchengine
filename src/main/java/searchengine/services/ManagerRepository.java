@@ -25,9 +25,10 @@ public class ManagerRepository {
     private final SiteRepository siteRepository;
 
     @Transactional
-    public List<SiteEntity> getAllSites(){
-       return siteRepository.findAll();
+    public List<SiteEntity> getAllSites() {
+        return siteRepository.findAll();
     }
+
     @Transactional(readOnly = true)
     public boolean hasLemmas() {
         try {
@@ -37,6 +38,7 @@ public class ManagerRepository {
             return false;
         }
     }
+
     @Transactional(readOnly = true)
     public boolean hasSites() {
         try {
@@ -46,6 +48,7 @@ public class ManagerRepository {
             return false;
         }
     }
+
     @Transactional(readOnly = true)
     public Optional<SiteEntity> findSite(String url) {
         try {
@@ -55,6 +58,7 @@ public class ManagerRepository {
             return Optional.empty();
         }
     }
+
     @Transactional(readOnly = true)
     public Optional<SiteEntity> findSite(int id) {
         try {
@@ -75,6 +79,7 @@ public class ManagerRepository {
             return false;
         }
     }
+
     @Transactional
     public boolean deleteSite(SiteEntity siteEntity) {
         try {
@@ -132,6 +137,7 @@ public class ManagerRepository {
             return false;
         }
     }
+
     @Transactional
     public boolean deletePage(PageEntity page) {
         try {
@@ -165,6 +171,7 @@ public class ManagerRepository {
             return Optional.empty();
         }
     }
+
     @Transactional(readOnly = true)
     public List<LemmaEntity> findAllLemmasBySite(SiteEntity site) {
         try {
@@ -174,6 +181,7 @@ public class ManagerRepository {
             return Collections.emptyList();
         }
     }
+
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(int id) {
         try {
@@ -183,6 +191,7 @@ public class ManagerRepository {
             return Optional.empty();
         }
     }
+
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(String lemma, int siteId) {
         try {
@@ -192,6 +201,7 @@ public class ManagerRepository {
             return Optional.empty();
         }
     }
+
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(String lemma, SiteEntity site) {
         try {
@@ -203,9 +213,7 @@ public class ManagerRepository {
     }
 
 
-
-
-//    @Transactional(readOnly = true)
+    //    @Transactional(readOnly = true)
 //    public Optional<LemmaEntity> findLemma(String lemma) {
 //        try {
 //            return lemmaRepository.findByLemma(lemma);
@@ -271,6 +279,7 @@ public class ManagerRepository {
             return false;
         }
     }
+
     @Transactional(readOnly = true)
     public List<LemmaEntity> findLemmas(List<String> names) {
         try {
@@ -280,8 +289,9 @@ public class ManagerRepository {
             return Collections.emptyList();
         }
     }
+
     @Transactional(readOnly = true)
-    public List<PageEntity> getAllPagesBySite (SiteEntity site) {
+    public List<PageEntity> getAllPagesBySite(SiteEntity site) {
         try {
             return pageRepository.findAllBySiteEntity(site);
         } catch (Exception e) {
@@ -289,8 +299,9 @@ public class ManagerRepository {
             return Collections.emptyList();
         }
     }
+
     @Transactional(readOnly = true)
-    public int getCountPagesBySite (SiteEntity site) {
+    public int getCountPagesBySite(SiteEntity site) {
         try {
             return pageRepository.countBySiteId(site.getId());
         } catch (Exception e) {
@@ -298,6 +309,7 @@ public class ManagerRepository {
             return 0;
         }
     }
+
     @Transactional(readOnly = true)
     public List<LemmaEntity> findLemmas(List<String> names, String siteUrl) {
         try {
@@ -307,8 +319,9 @@ public class ManagerRepository {
             return Collections.emptyList();
         }
     }
+
     @Transactional(readOnly = true)
-    public int getCountPagesWhereLemma (LemmaEntity lemma, SiteEntity site) {
+    public int getCountPagesWhereLemma(LemmaEntity lemma, SiteEntity site) {
         try {
             return indexRepository.countPagesContainingLemma(lemma, site);
         } catch (Exception e) {
@@ -316,6 +329,7 @@ public class ManagerRepository {
             return 0;
         }
     }
+
     @Transactional(readOnly = true)
     public List<IndexEntity> getAllIndexesBySite(LemmaEntity lemma, SiteEntity site) {
         try {
@@ -327,13 +341,23 @@ public class ManagerRepository {
     }
 
     @Transactional
-    public boolean saveIndex( List<IndexEntity> indexs) {
+    public boolean saveIndex(List<IndexEntity> indexs) {
         try {
             indexRepository.saveAll(indexs);
             return true;
         } catch (Exception e) {
             log.error("Ошибка при сохранении индексов", e);
             return false;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public int getCountLemmasBySite(SiteEntity site) {
+        try {
+            return lemmaRepository.countLemmasBySite(site.getId());
+        } catch (Exception e) {
+            log.error("Ошибка при подсчете лемм на сайте {}", site.getId(), e);
+            return 0;
         }
     }
 }

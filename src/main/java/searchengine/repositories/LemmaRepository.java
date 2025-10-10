@@ -28,6 +28,7 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
 
     List<LemmaEntity> findByLemmaInAndSiteEntity_Url(List<String> names, String siteUrl);
 
-
+    @Query("SELECT COUNT(l) FROM LemmaEntity l WHERE l.siteEntity.id = :siteId")
+    int countLemmasBySite(@Param("siteId") Integer siteId);
 }
 

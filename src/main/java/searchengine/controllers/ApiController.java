@@ -121,12 +121,4 @@ public class ApiController {
     private ResponseEntity<ApiResponse> error(String message, HttpStatus status) {
         return ResponseEntity.status(status).body(new ApiResponse(false, message));
     }
-    @Autowired
-    private RequestMappingHandlerMapping handlerMapping;
-
-    @PostConstruct
-    public void printEndpoints() {
-        handlerMapping.getHandlerMethods()
-                .forEach((key, value) -> System.out.println(key + " -> " + value));
-    }
 }
