@@ -25,7 +25,7 @@ public class SearchServiceImpl implements SearchService {
             if (!hasAnySites()) return false; // глобальная проверка
         }
         log.info("сервис готов к поиску");
-        return  context.getManagerRepository().hasLemmas();
+        return  context.getDataManager().hasLemmas();
     }
 
     @Override
@@ -38,13 +38,13 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private boolean isSiteIndexed(String url) {
-        return context.getManagerRepository()
+        return context.getDataManager()
                 .findSite(url)
                 .map(site -> site.getStatus() == Status.INDEXED)
                 .orElse(false);
     }
 
     private boolean hasAnySites(){
-        return context.getManagerRepository().hasSites();
+        return context.getDataManager().hasSites();
     }
 }

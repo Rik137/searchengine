@@ -23,7 +23,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public StatisticsResponse getStatistics() {
         // Получаем все сайты из репозитория
-        List<SiteEntity> sites = context.getManagerRepository().getAllSites();
+        List<SiteEntity> sites = context.getDataManager().getAllSites();
 
         TotalStatistics total = new TotalStatistics();
         total.setSites(sites.size());
@@ -34,7 +34,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (SiteEntity site : sites) {
             // Подсчёт страниц и лемм
             int pages = site.getPageEntityList().size();
-            int lemmas = context.getManagerRepository().getCountLemmasBySite(site);
+            int lemmas = context.getDataManager().getCountLemmasBySite(site);
 
             // Суммируем в total
             total.setPages(total.getPages() + pages);

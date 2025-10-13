@@ -33,7 +33,7 @@ public class PageTask extends RecursiveAction {
                     resp.getStatusCode(),
                     htmlBody
             );
-            context.getManagerRepository().savePage(page);
+            context.getDataManager().savePage(page);
 
 
                 context.getLemmaFrequencyService().savePageLemmasAndIndexesThreadSafe(page, page.getContent());
@@ -42,7 +42,7 @@ public class PageTask extends RecursiveAction {
                 List<PageTask> refs = context.getManagerJSOUP()
                         .getLinksFromPage(url, siteDomain)
                         .stream()
-                        .filter(context.getVisitedUrlStore()::markAsVisited)
+                        .filter(context.getVisitedUrlStore()::visitUrl)
                         .map(link -> new PageTask(link, siteDomain, context, siteEntity))
                         .toList();
 

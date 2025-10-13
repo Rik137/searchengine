@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class LemmaFrequencyService {
     private final LemmaRepository lemmaRepository;
 
-    private final ManagerRepository managerRepository;
+    private final DataManager dataManager;
     private final LemmaProcessor lemmaProcessor;
     private final EntityFactory entityFactory;
     private static final double PERCENT = 30.0f;
@@ -38,16 +38,16 @@ public class LemmaFrequencyService {
             String lemmaName = entry.getKey();
             int countToRemove = entry.getValue();
 
-            managerRepository.findLemma(lemmaName, site).ifPresentOrElse(
+            dataManager.findLemma(lemmaName, site).ifPresentOrElse(
                     lemmaEntity -> {
                         int newFrequency = lemmaEntity.getFrequency() - countToRemove;
                         lemmaEntity.setFrequency(Math.max(newFrequency, 0));
 
                         if (lemmaEntity.getFrequency() == 0) {
-                            managerRepository.deleteLemma(lemmaEntity.getId());
+                            dataManager.deleteLemma(lemmaEntity.getId());
                             log.debug("Удалена лемма '{}'", lemmaName);
                         } else {
-                            managerRepository.saveLemma(lemmaEntity);
+                            dataManager.saveLemma(lemmaEntity);
                         }
                     },
                     () -> log.debug("Лемма '{}' не найдена в БД", lemmaName)
@@ -66,7 +66,7 @@ public class LemmaFrequencyService {
             String lemmaName = entry.getKey();
             int frequencyToAdd = entry.getValue();
 
-            Optional<LemmaEntity> lemmaOpt = managerRepository.findLemma(
+            Optional<LemmaEntity> lemmaOpt = dataManager.findLemma(
                     lemmaName,
                     page.getSiteEntity().getId()
             );
@@ -75,15 +75,15 @@ public class LemmaFrequencyService {
 
             if (lemmaOpt.isEmpty()) {
                 lemmaEntity = entityFactory.createLemmaEntity(page.getSiteEntity(), lemmaName, frequencyToAdd);
-                managerRepository.saveLemma(lemmaEntity);
+                dataManager.saveLemma(lemmaEntity);
                 log.debug("Создана новая лемма '{}'", lemmaName);
             } else {
                 lemmaEntity = lemmaOpt.get();
                 lemmaEntity.setFrequency(lemmaEntity.getFrequency() + frequencyToAdd);
-                managerRepository.saveLemma(lemmaEntity);
+                dataManager.saveLemma(lemmaEntity);
             }
             IndexEntity index = entityFactory.createIndexEntity(page, lemmaEntity, frequencyToAdd);
-            managerRepository.saveIndex(index);
+            dataManager.saveIndex(index);
         }
     }
 
@@ -93,27 +93,27 @@ public class LemmaFrequencyService {
 
     @Transactional
     public void recalculateRankForAllSites(SiteEntity site) {
-        int totalPages = managerRepository.getCountPagesBySite(site);
-        List<LemmaEntity> lemmas = managerRepository.findAllLemmasBySite(site);
+        int totalPages = dataManager.getCountPagesBySite(site);
+        List<LemmaEntity> lemmas = dataManager.findAllLemmasBySite(site);
 
         for (LemmaEntity lemma : lemmas) {
-            int df = managerRepository.getCountPagesWhereLemma(lemma, site);
-            List<IndexEntity> indexes = managerRepository.getAllIndexesBySite(lemma, site);
+            int df = dataManager.getCountPagesWhereLemma(lemma, site);
+            List<IndexEntity> indexes = dataManager.getAllIndexesBySite(lemma, site);
 
             for (IndexEntity index : indexes) {
                 float tf = index.getRank();
                 float newRank = (float) (tf * Math.log((double) totalPages / (df + 1)));
                 index.setRank(newRank);
             }
-            managerRepository.saveIndex(indexes);
+            dataManager.saveIndex(indexes);
         }
     }
 
 
     private List<LemmaEntity> getLemmaFromDataBase(List<String> lemmas, String url) {
         return (url == null || url.isBlank())
-                ? managerRepository.findLemmas(lemmas)
-                : managerRepository.findLemmas(lemmas, url);
+                ? dataManager.findLemmas(lemmas)
+                : dataManager.findLemmas(lemmas, url);
     }
 
     public List<SearchResult> searchResult(String query, String url, int offset, int limit) {
@@ -137,7 +137,7 @@ public class LemmaFrequencyService {
         // 3️⃣ Фильтруем по частоте и сортируем по возрастанию
         List<LemmaEntity> filtered = lemmasEntity.stream()
                 .filter(lemma -> {
-                    float totalPages = managerRepository.getCountPagesBySite(lemma.getSiteEntity());
+                    float totalPages = dataManager.getCountPagesBySite(lemma.getSiteEntity());
                     float onePercent = totalPages / 100.0f;
                     float lemmaPercent = lemma.getIndexEntityList().size() / onePercent;
                     return lemmaPercent <= PERCENT;

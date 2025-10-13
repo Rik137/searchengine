@@ -36,11 +36,11 @@ public class PageIndexingServiceImpl implements PageIndexingService {
             return false;
         }
         // Если страница уже есть — удаляем её и связанные леммы/индексы
-        context.getManagerRepository()
+        context.getDataManager()
                 .findPathPage(url)
                 .ifPresent(existingPage -> {
                     context.getLemmaFrequencyService().decreaseLemmaFrequencies(existingPage);
-                    context.getManagerRepository().deletePage(existingPage);
+                    context.getDataManager().deletePage(existingPage);
                     //вызов подсчет и сохранение лемм
                     log.info("Старая страница {} удалена перед обновлением", url);
                 });
@@ -50,7 +50,7 @@ public class PageIndexingServiceImpl implements PageIndexingService {
     }
 
     private SiteEntity findSiteForUrl(String url) {
-        List<SiteEntity> sites = context.getManagerRepository().getAllSites();
+        List<SiteEntity> sites = context.getDataManager().getAllSites();
         if (sites.isEmpty()) {
             log.warn("База сайтов пуста! Добавьте хотя бы один сайт.");
             return null;
@@ -85,7 +85,7 @@ public class PageIndexingServiceImpl implements PageIndexingService {
                 response.getStatusCode(),
                 response.getBody()
         );
-        context.getManagerRepository().savePage(page);
+        context.getDataManager().savePage(page);
         context.getLemmaFrequencyService().savePageLemmasAndIndexes(page, response.getBody());
     }
 }

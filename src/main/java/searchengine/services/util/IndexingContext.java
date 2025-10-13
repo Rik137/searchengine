@@ -6,13 +6,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import searchengine.config.Site;
 import searchengine.config.SitesList;
 import searchengine.services.LemmaFrequencyService;
 import searchengine.services.LemmaProcessor;
-import searchengine.services.ManagerRepository;
-
-import java.util.List;
+import searchengine.services.DataManager;
 
 @Component
 @RequiredArgsConstructor
@@ -22,7 +19,7 @@ import java.util.List;
 public class IndexingContext {
     private final SitesList sites;
     private final EntityFactory entityFactory;
-    private final ManagerRepository managerRepository;
+    private final DataManager dataManager;
     private final ManagerJSOUP managerJSOUP;
     private final LemmaProcessor lemmaProcessor;
     private final VisitedUrlStore visitedUrlStore;

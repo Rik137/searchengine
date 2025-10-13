@@ -3,11 +3,26 @@ package searchengine.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * DTO, представляющее результат загрузки страницы.
+ */
+
 @Getter
 @AllArgsConstructor
 public class PageResponse {
-    private final int statusCode;
-    private final String body;
-    private final boolean isHtml;
 
+    /**
+     * HTTP-статус ответа.
+     */
+    private final int statusCode;
+
+    /**
+     * Содержимое страницы (HTML или текст).
+     */
+    private final String body;
+
+    /**
+     * Флаг, указывающий, является ли содержимое HTML.
+     */
+    private final boolean isHtml;
 }

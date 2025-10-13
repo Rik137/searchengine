@@ -23,7 +23,7 @@ public class SitesTask extends RecursiveAction {
         //производим удаление всех старых сайтов которые необходимо индексировать повторно
         context.getSites().getSites().stream()
                 .map(site -> site.getUrl())
-                .forEach(url -> context.getManagerRepository().deleteSite(url));
+                .forEach(url -> context.getDataManager().deleteSite(url));
         // создаём задачи для каждого сайта
         List<SiteTask> siteTasks = context.getSites().getSites().stream()
                 .map(site -> new SiteTask(site, context))

@@ -60,7 +60,7 @@ public class ManagerTasks {
             site.setStatus(Status.FAILED);
             site.setLastError("Пользователь остановил индексацию");
             site.setStatusTime(LocalDateTime.now());
-            context.getManagerRepository().saveSite(site);
+            context.getDataManager().saveSite(site);
         }
     }
 }

@@ -25,8 +25,8 @@ public class SiteTask extends RecursiveAction {
         if (context.shouldStop("SiteTask-" + site.getUrl())) return;
         // Сохранение дефолтного варианта сайта
          siteEntity = context.getEntityFactory().createSiteEntity(site.getName(), site.getUrl());
-         context.getManagerRepository().saveSite(siteEntity);
-         context.getVisitedUrlStore().markSiteActive(siteEntity);
+         context.getDataManager().saveSite(siteEntity);
+         context.getVisitedUrlStore().activateSite(siteEntity);
 
         try {
             log.info("Обработка сайта: {}", site.getUrl());
@@ -38,7 +38,7 @@ public class SiteTask extends RecursiveAction {
             log.info("Найдено {} внутренних ссылок на {}", pages.size(), site.getUrl());
             // Создаём задачи PageTask для каждой страницы
             List<PageTask> pageTasks = pages.stream()
-                    .filter(context.getVisitedUrlStore()::markAsVisited)
+                    .filter(context.getVisitedUrlStore()::visitUrl)
                     .map(url -> new PageTask(url, site.getUrl(), context, siteEntity))
                     .collect(Collectors.toList());
 
@@ -53,7 +53,7 @@ public class SiteTask extends RecursiveAction {
                 siteEntity.setStatus(Status.INDEXED);
                 siteEntity.setLastError(null);
                 siteEntity.setStatusTime(LocalDateTime.now());
-                context.getManagerRepository().saveSite(siteEntity);
+                context.getDataManager().saveSite(siteEntity);
                 log.info("идет подсчет веса лемм");
                 context.getLemmaFrequencyService().recalculateRankForAllSites(siteEntity);
                 log.info("подсчет веса лемм завершен");
@@ -68,7 +68,7 @@ public class SiteTask extends RecursiveAction {
         siteEntity.setStatus(Status.FAILED);
         siteEntity.setLastError(message);
         siteEntity.setStatusTime(LocalDateTime.now());
-        context.getManagerRepository().saveSite(siteEntity);
+        context.getDataManager().saveSite(siteEntity);
     }
 
 }
