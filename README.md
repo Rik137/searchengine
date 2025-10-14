@@ -4,6 +4,9 @@
 
 SearchEngine — это Spring Boot приложение, реализующее полнотекстовый поиск по локально индексированным страницам сайтов. Система поддерживает лемматизацию русского, подсветку слов запроса в сниппетах и API для получения результатов поиска.
 
+Документация API:
+Каждый метод проекта снабжен подробной документацией, а для удобного просмотра и тестирования API используется Springdoc OpenAPI UI. Для этого подключена зависимость: springdoc-openapi-ui.
+
 ---
 
 ## Технологический стек
@@ -192,7 +195,9 @@ searchengine
 │   ├─ PageRepository.java  
 │   ├─ LemmaRepository.java  
 │   ├─ IndexRepository.java  
-│   └─ SiteRepository.java  
+│   └─ SiteRepository.java
+├─ log
+|   └─ LogTag.java
 ├─ services/   # Реализация бизнес-логики  
 │   ├─ IndexingServiceImpl.java  
 │   ├─ PageIndexingServiceImpl.java  
