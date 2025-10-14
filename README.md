@@ -198,7 +198,7 @@ searchengine
 │   ├─ StatisticsServiceImpl.java  
 │   ├─ LemmaProcessor.java  
 │   ├─ LemmaFrequencyService.java  
-│   ├─ ManagerRepository.java  
+│   ├─ DataManager.java  
 │   ├─ ManagerTasks.java  
 |   ├─ serviceinterface/   # Интерфейсы сервисов  
 │   |  ├─ IndexingService.java  
