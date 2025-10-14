@@ -1,6 +1,7 @@
-# searchengine
+# SearchEngine
 
 **Поисковый движок на Java с использованием Spring Boot и MySQL**
+
 SearchEngine — это Spring Boot приложение, реализующее полнотекстовый поиск по локально индексированным страницам сайтов. Система поддерживает лемматизацию русского, подсветку слов запроса в сниппетах и API для получения результатов поиска.
 
 ---
@@ -66,7 +67,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: none # управление схемой БД (используется Liquibase)
-    show-sql: true # для отладки — вывод SQL-запросов
+    show-sql: false # для отладки — вывод SQL-запросов
 
 # Настройки сайтов для индексирования
 indexing-settings:
@@ -95,10 +96,11 @@ pom.xml                         # Maven-конфигурация и зависи
 git clone https://github.com/yourusername/searchengine.git
 cd searchengine
 ```
-2. Настройка базы данных
-Создать базу MySQL, например search_engine.
-Указать данные подключения в application.yml.
-3. Сборка проекта
+2. Настроить базу данных MySQL:
+```sql
+CREATE DATABASE search_engine;
+```
+4. Сборка проекта
 ```bash
 mvn clean install
 ```
