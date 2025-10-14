@@ -2,7 +2,7 @@
 
 **Поисковый движок на Java с использованием Spring Boot и MySQL**
 
-SearchEngine — это Spring Boot приложение, реализующее полнотекстовый поиск по локально индексированным страницам сайтов. Система поддерживает лемматизацию русского, подсветку слов запроса в сниппетах и API для получения результатов поиска.
+SearchEngine — это Spring Boot приложение, реализующее полнотекстовый поиск по локально индексированным страницам сайтов. Система поддерживает лемматизацию русского, API для получения результатов поиска.
 
 Документация API:
 Каждый метод проекта снабжен подробной документацией, а для удобного просмотра и тестирования API используется Springdoc OpenAPI UI. Для этого подключена зависимость: springdoc-openapi-ui.
@@ -240,4 +240,74 @@ searchengine
     │   └─ index.html  
     └─ application.yml  # Конфигурация приложения  
 ```
+## Как пользоваться API
+---
+Все методы доступны по базовому пути: http://localhost:8080/api. Ниже приведены основные эндпоинты и примеры использования.
+1. Запуск индексации всех сайтов
+GET /api/startIndexing
+Пример запроса:
+curl -X GET http://localhost:8080/api/startIndexing
+Ответ:
 
+```json
+{
+  "result": true,
+  "error": null
+}
+```
+2. Остановка индексации
+GET /api/stopIndexing
+Пример запроса:
+curl -X GET http://localhost:8080/api/stopIndexing
+3. Получение статистики
+GET /api/statistics
+Пример запроса:
+curl -X GET http://localhost:8080/api/statistics
+Пример ответа:
+
+```json
+{
+  "totalPages": 120,
+  "totalLemmas": 4500,
+  "sites": [
+    {
+      "url": "https://nikoartgallery.com",
+      "status": "INDEXED",
+      "pages": 70
+    },
+    {
+      "url": "https://www.playback.ru",
+      "status": "INDEXED",
+      "pages": 50
+    }
+  ]
+}
+```
+4. Индексация конкретной страницы
+POST /api/indexPage?url={URL}
+Пример запроса:
+curl -X POST "http://localhost:8080/api/indexPage?url=https://nikoartgallery.com/art1"
+5. Поиск по сайту или запросу
+GET /api/search?query={запрос}&site={сайт}&offset=0&limit=20
+Пример запроса:
+curl -X GET "http://localhost:8080/api/search?query=картина&site=https://nikoartgallery.com"
+Пример ответа:
+
+```json
+{
+  "result": true,
+  "count": 5,
+  "data": [
+    {
+      "title": "Картина «Закат»",
+      "snippet": "Картина «Закат» выполнена маслом на холсте. Это одна из самых известных работ художника...",
+      "url": "https://nikoartgallery.com/art1"
+    },
+    {
+      "title": "Картина «Утро»",
+      "snippet": "Утренний пейзаж отражает нежные оттенки неба и света, создавая атмосферу спокойствия...",
+      "url": "https://nikoartgallery.com/art2"
+    }
+  ]
+}
+```
