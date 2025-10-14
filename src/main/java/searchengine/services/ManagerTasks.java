@@ -4,11 +4,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import searchengine.logs.LogTag;
 import searchengine.model.SiteEntity;
 import searchengine.model.Status;
 import searchengine.services.tasks.SitesTask;
 import searchengine.services.util.IndexingContext;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.concurrent.ForkJoinPool;
@@ -19,34 +19,52 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @RequiredArgsConstructor
+
+/**
+ * Менеджер задач индексации
+ * <p>Отвечает за запуск и остановку многопоточной индексации всех сайтов,
+ * используя {@link ForkJoinPool} и корневую задачу {@link SitesTask}.
+ * Все необходимые компоненты для работы индексации хранятся в {@link IndexingContext}.
+ */
+
 public class ManagerTasks {
 
-    private ForkJoinPool pool;  //поле для потоков;
-    private final IndexingContext context; // все необходимые компоненты водном
+    private static final LogTag TAG = LogTag.MANAGER_TASKS;
 
-    //метод старта запуска пулов
+    /** Пул потоков для выполнения задач индексации. */
+    private ForkJoinPool pool;
+
+    /** Контекст индексации с необходимыми сервисами и данными. */
+    private final IndexingContext context;
+
+
+    /**
+     * Запускает задачи индексации всех сайтов.
+     */
     public void startIndexTask(){
         context.clearStopRequest();
         pool = new ForkJoinPool();
-        //очищение коллекции посещений при повторной индексации
         context.getVisitedUrlStore().resetAll();
 
-        log.info("ИНДЕКСАЦИЯ УСПЕШНО ЗАПУЩЕНА...");
+        log.info("{}  ИНДЕКСАЦИЯ УСПЕШНО ЗАПУЩЕНА...", TAG);
       try {
-          // запускаем одну корневую задачу, которая разрулит все сайты
+
           pool.invoke(new SitesTask(context));
       }finally {
-          log.info("ИНДЕКСАЦИЯ ЗАВЕРШИНА...");
+          log.info("{} ИНДЕКСАЦИЯ ЗАВЕРШИНА...", TAG);
       }
     }
-    //метод остановки
+
+    /**
+     * Останавливает текущую индексацию.
+     */
     public void stopIndexingTask() {
-        log.info("Останавливаем индексацию: ставим флаг и шлём shutdownNow() пулу");
-        context.requestStop();         // ставим флаг
-        pool.shutdown();// отправляем interrupt в воркеры
+        log.info("{}  Останавливаем индексацию: ставим флаг и шлём shutdownNow() пулу", TAG);
+        context.requestStop();
+        pool.shutdown();
         try {
             if (!pool.awaitTermination(30, TimeUnit.SECONDS)) {
-                pool.shutdownNow(); // если через 30 сек не остановился, тогда уже жёстко
+                pool.shutdownNow();
             }
         } catch (InterruptedException e) {
             pool.shutdownNow();
@@ -54,6 +72,11 @@ public class ManagerTasks {
         }
         updateSitesAfterStop();
     }
+
+    /**
+     * Обновляет статус сайтов после принудительной остановки индексации.
+     * <p>Все активные сайты получают статус FAILED с указанием ошибки.
+     */
     private void updateSitesAfterStop() {
         Collection<SiteEntity> activeSites = context.getVisitedUrlStore().getActiveSites();
         for (SiteEntity site : activeSites) {

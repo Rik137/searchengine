@@ -64,7 +64,6 @@ public class VisitedUrlStore {
         activeSites.put(site.getUrl(), site);
     }
 
-
     /**
      * Убирает сайт из списка активных по URL.
      *

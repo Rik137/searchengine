@@ -97,7 +97,7 @@ public class DataManager {
     public boolean saveSite(SiteEntity site) {
         return wrapOperation(() -> {
             siteRepository.save(site);
-            log.info("{} Сайт {} сохранён", TAG, site);
+            log.debug("{} Сайт {} сохранён", TAG, site);
             return true;
         }, "Ошибка при сохранении сайта " + site, false);
     }
@@ -112,7 +112,7 @@ public class DataManager {
     public boolean deleteSite(SiteEntity site) {
         return wrapOperation(() -> {
             siteRepository.delete(site);
-            log.info("{} Сайт с id={} удалён", TAG, site.getId());
+            log.debug("{} Сайт с id={} удалён", TAG, site.getId());
             return true;
         }, "Ошибка при удалении сайта с id=" + site.getId(), false);
     }
@@ -127,7 +127,7 @@ public class DataManager {
     public boolean deleteSite(String url) {
         return wrapOperation(() -> {
             siteRepository.deleteByUrl(url);
-            log.info("{} Сайт с url={} удалён", TAG, url);
+            log.debug("{} Сайт с url={} удалён", TAG, url);
             return true;
         }, "Ошибка при удалении сайта с url=" + url, false);
     }
@@ -142,7 +142,7 @@ public class DataManager {
     public boolean deleteSiteById(int id) {
         return wrapOperation(() -> {
             siteRepository.deleteById(id);
-            log.info("{} Сайт с id={} удалён", TAG, id);
+            log.debug("{} Сайт с id={} удалён", TAG, id);
             return true;
         }, "Ошибка при удалении сайта с id=" + id, false);
     }
@@ -205,7 +205,7 @@ public class DataManager {
     public boolean savePage(PageEntity page) {
         return wrapOperation(() -> {
             pageRepository.save(page);
-            log.info("{} Страница {} сохранена", TAG, page);
+            log.debug("{} Страница {} сохранена", TAG, page);
             return true;
         }, "Ошибка при сохранении страницы " + page, false);
     }
@@ -220,7 +220,7 @@ public class DataManager {
     public boolean deletePage(PageEntity page) {
         return wrapOperation(() -> {
             pageRepository.delete(page);
-            log.info("{} Страница с id={} удалена", TAG, page.getId());
+            log.debug("{} Страница с id={} удалена", TAG, page.getId());
             return true;
         }, "Ошибка при удалении страницы с id=" + page.getId(), false);
     }
@@ -235,7 +235,7 @@ public class DataManager {
     public boolean deletePage(int id) {
         return wrapOperation(() -> {
             pageRepository.deleteById(id);
-            log.info("{} Страница с id={} удалена", TAG, id);
+            log.debug("{} Страница с id={} удалена", TAG, id);
             return true;
         }, "Ошибка при удалении страницы с id=" + id, false);
     }
@@ -348,7 +348,7 @@ public class DataManager {
     public boolean saveLemma(LemmaEntity lemma) {
         return wrapOperation(() -> {
             lemmaRepository.save(lemma);
-            log.info("{} Лемма {} сохранена", TAG, lemma);
+            log.debug("{} Лемма {} сохранена", TAG, lemma);
             return true;
         }, "Ошибка при сохранении леммы " + lemma, false);
     }
@@ -363,7 +363,7 @@ public class DataManager {
     public boolean deleteLemma(int id) {
         return wrapOperation(() -> {
             lemmaRepository.deleteById(id);
-            log.info("{} Лемма с id={} удалена", TAG, id);
+            log.debug("{} Лемма с id={} удалена", TAG, id);
             return true;
         }, "Ошибка при удалении леммы с id=" + id, false);
     }
@@ -419,7 +419,7 @@ public class DataManager {
     public boolean saveIndex(IndexEntity index) {
         return wrapOperation(() -> {
             indexRepository.save(index);
-            log.info("{} Индекс {} сохранён", TAG, index);
+            log.debug("{} Индекс {} сохранён", TAG, index);
             return true;
         }, "Ошибка при сохранении индекса " + index, false);
     }
@@ -434,7 +434,7 @@ public class DataManager {
     public boolean saveIndex(List<IndexEntity> indexes) {
         return wrapOperation(() -> {
             indexRepository.saveAll(indexes);
-            log.info("{} Список индексов сохранён, count={}", TAG, indexes.size());
+            log.debug("{} Список индексов сохранён, count={}", TAG, indexes.size());
             return true;
         }, "Ошибка при сохранении списка индексов", false);
     }
@@ -449,7 +449,7 @@ public class DataManager {
     public boolean deleteIndex(int id) {
         return wrapOperation(() -> {
             indexRepository.deleteById(id);
-            log.info("{} Индекс с id={} удалён", TAG, id);
+            log.debug("{} Индекс с id={} удалён", TAG, id);
             return true;
         }, "Ошибка при удалении индекса с id=" + id, false);
     }
