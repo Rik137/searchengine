@@ -16,7 +16,6 @@ SearchEngine — это Spring Boot приложение, реализующее
 - **HTML-парсер:** Jsoup 1.16.1
 - **ORM:** Spring Data JPA
 - **База данных:** MySQL
-- **Лемматизация:** Apache Lucene Morphology (русский и английский)
 - **Управление зависимостями:** Maven
 - **Логирование и утилиты:** Lombok 1.18.32, SLF4J
 - **Миграции БД:** Liquibase
