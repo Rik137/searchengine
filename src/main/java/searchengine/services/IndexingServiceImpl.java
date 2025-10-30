@@ -33,6 +33,9 @@ public class IndexingServiceImpl implements IndexingService {
     /** Таймер для измерения времени индексации. */
     private Stopwatch stopwatch = new Stopwatch();
 
+    /** Пул потоков для асинхронного запуска задач */
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+
 
     /**
      * Проверяет, выполняется ли в данный момент индексация.
@@ -44,18 +47,31 @@ public class IndexingServiceImpl implements IndexingService {
     }
 
 
-    /**
-     * Запускает процесс индексации всех сайтов.
-     */
-    @Override
-    public void startIndexing(){
+   /*
+    * Запускает процесс индексации всех сайтов.
+    */
+   @Override
+   public void startIndexing() {
+        if (isIndexing()) {
+            log.warn("{} Индексация уже запущена", TAG);
+            return;
+        }
+        if (executor.isShutdown() || executor.isTerminated()) {
+            executor = Executors.newSingleThreadExecutor();
+        }
         setStatusIndexing(true);
-        stopwatch.start();
-        managerTasks.startIndexTask();
-        stopwatch.stop();
-        setStatusIndexing(false);
-        log.info("{}  Индексация прошла за {} cek.", TAG, stopwatch.getSeconds());
-        stopwatch.reset();
+        executor.submit(() -> {
+            try {
+                stopwatch.start();
+                managerTasks.startIndexTask();
+            } catch (Exception e) {
+                log.error("{} Ошибка при индексации", TAG, e);
+            } finally {
+                stopwatch.stop();
+                stopwatch.reset();
+                setStatusIndexing(false);
+            }
+        });
     }
 
     /**
