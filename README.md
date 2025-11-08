@@ -1,64 +1,53 @@
-# SearchEngine
-
-**Поисковый движок на Java с использованием Spring Boot и MySQL**
-
-SearchEngine — это Spring Boot приложение, реализующее полнотекстовый поиск по локально индексированным страницам сайтов. Система поддерживает лемматизацию русского, API для получения результатов поиска.
-
-Документация API:
-Каждый метод проекта снабжен подробной документацией, а для удобного просмотра и тестирования API используется Springdoc OpenAPI UI. Для этого подключена зависимость: springdoc-openapi-ui.
-
+# SearchEngine  
 ---
-
-## Технологический стек
-
-- **Язык:** Java 17
-- **Фреймворк:** Spring Boot 2.7.1
-- **HTML-парсер:** Jsoup 1.16.1
-- **ORM:** Spring Data JPA
-- **База данных:** MySQL
-- **Управление зависимостями:** Maven
-- **Логирование и утилиты:** Lombok 1.18.32, SLF4J
-- **Миграции БД:** Liquibase
-- **Шаблоны (если веб-интерфейс):** Thymeleaf
-
----
-## Maven и зависимости (pom.xml)  
-Проект использует Maven для управления зависимостями и сборки:  
-spring-boot-starter-web — для REST API и веб-функционала.  
-spring-boot-starter-data-jpa — работа с базой данных через JPA/Hibernate.  
-spring-boot-starter-validation — валидация данных входящих запросов.  
-spring-boot-starter-thymeleaf — шаблонизация страниц (если веб-интерфейс).  
-jsoup — парсинг HTML страниц и извлечение текста/тегов.  
-mysql-connector-java — драйвер MySQL.  
-lombok — сокращение boilerplate-кода (@Getter, @Setter, @Slf4j).  
-Apache Lucene Morphology — лемматизация русского языка   
-Liquibase — управление версионированием базы данных.  
-
-## Конфигурация приложения (`application.yml`)
-
-Ниже пример конфигурации с пояснениями:
-
-```yaml
+A search engine built with Java using Spring Boot and MySQL  
+SearchEngine is a Spring Boot application that implements full-text search across locally indexed website pages.  
+The system supports Russian lemmatization and provides an API for retrieving search results.  
+API Documentation:  
+Each project method is thoroughly documented. For convenient viewing and testing, the API uses Springdoc OpenAPI UI via the dependency springdoc-openapi-ui.  
+Tech Stack  
+Language: Java 17  
+Framework: Spring Boot 2.7.1  
+HTML Parser: Jsoup 1.16.1  
+ORM: Spring Data JPA  
+Database: MySQL  
+Dependency Management: Maven  
+Logging & Utilities: Lombok 1.18.32, SLF4J  
+DB Migrations: Liquibase  
+Templates (if using web interface): Thymeleaf  
+Maven and Dependencies (pom.xml)  
+The project uses Maven for dependency management and build:  
+spring-boot-starter-web — for REST API and web functionality.  
+spring-boot-starter-data-jpa — database interaction via JPA/Hibernate.  
+spring-boot-starter-validation — request data validation.  
+spring-boot-starter-thymeleaf — for page templating (if web UI).  
+jsoup — parsing HTML pages and extracting text/tags.  
+mysql-connector-java — MySQL driver.  
+lombok — reduces boilerplate code (@Getter, @Setter, @Slf4j).  
+Apache Lucene Morphology — Russian lemmatization.  
+Liquibase — database versioning and schema management.  
+Application Configuration (application.yml)  
+Example configuration with comments:  
 server:
-  port: 8080 # Порт, на котором будет запущен Spring Boot сервер
+  port: 8080 # Port where the Spring Boot server runs
 
 logging:
   level:
-    org.apache.coyote.http11.Http11Processor: ERROR # Убираем шум логов Tomcat
+    org.apache.coyote.http11.Http11Processor: ERROR # Reduce Tomcat log noise
 
-# Настройки RickBot — робота, который обходит сайты и индексирует страницы
+## RickBot — the crawler that scans websites and indexes pages  
 rickbot:
   user-agents:
     - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
     - "RickBot/1.0"
-  min-delay-ms: 500 # минимальная задержка между запросами
-  max-delay-ms: 2000 # максимальная задержка между запросами
+  min-delay-ms: 500 # minimum delay between requests
+  max-delay-ms: 2000 # maximum delay between requests
   referer: "https://github.com/yourusername/searchengine/blob/main/README.md"
 
 spring:
   liquibase:
-    change-log: classpath:db/changelog/changelog-master.xml # Скрипты миграции базы
+    change-log: classpath:db/changelog/changelog-master.xml # Liquibase migration scripts
   datasource:
     username: root
     password: password_here
@@ -68,70 +57,66 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: none # управление схемой БД (используется Liquibase)
-    show-sql: false # для отладки — вывод SQL-запросов
+      ddl-auto: none # DB schema managed by Liquibase
+    show-sql: false # for debugging SQL output
 
-# Настройки сайтов для индексирования
+### Sites to be indexed  
 indexing-settings:
   sites:
     - url: https://nikoartgallery.com/
       name: Nikoargallery.com
     - url: https://www.playback.ru
       name: PlayBack.Ru
-🔹 Комментарии помогают понять, что делает каждый блок и как менять конфигурацию под свои сайты и БД.
+🔹 Comments help to understand each block and adjust configuration for your sites and database.
 
-Структура проекта
-src/
- └─ main/
-     ├─ java/...          # Основной код приложения
-     └─ resources/
-         ├─ application.yml       # Конфигурации Spring и базы данных
-         └─ db/changelog/          # Скрипты Liquibase
-.gitignore                      # Исключения для IDE, .class, target
-README.md                       # Документация проекта
-pom.xml                         # Maven-конфигурация и зависимости
+---
 
+### Project Structure  
+```java
+src/  
+└─ main/  
+├─ java/... # Application source code  
+└─ resources/  
+├─ application.yml # Spring and DB configurations  
+└─ db/changelog/ # Liquibase scripts  
+.gitignore # IDE/class/target exclusions  
+README.md # Project documentation  
+pom.xml # Maven configuration  
 ```
-### Сборка и запуск
-1. Клонирование репозитория
+---
+
+### Build and Run  
+
+1. Clone the repository:  
 ```bash
 git clone https://github.com/yourusername/searchengine.git
 cd searchengine
-```
-2. Настроить базу данных MySQL:
-```sql
+Configure MySQL database:
 CREATE DATABASE search_engine;
-```
-4. Сборка проекта
-```bash
+Build the project:
 mvn clean install
-```
-5. Запуск
-```bash
+Run:
 mvn spring-boot:run
-```
-После запуска API будет доступен на http://localhost:8080
-
- Миграции базы данных (Liquibase)
-Перед использованием проекта убедитесь, что база данных создана и доступна.
-Пример конфигурации в application.yml для Liquibase:
+After startup, the API will be available at http://localhost:8080
+Database Migrations (Liquibase)
+Before running the app, make sure your database is created and accessible.
+Example Liquibase config in application.yml:
 spring:
   liquibase:
     change-log: classpath:db/changelog/changelog-master.xml
-Файл src/main/resources/db/changelog/changelog-master.xml содержит версионированные изменения схемы, например:  
-```html
+File src/main/resources/db/changelog/changelog-master.xml contains versioned schema changes, for example:
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <!-- 1. Изменяем тип колонки path на TEXT -->
+    <!-- 1. Change column type -->
     <changeSet id="1" author="rik">
         <modifyDataType tableName="pages" columnName="path" newDataType="TEXT"/>
     </changeSet>
 
-    <!-- 2. Создаём индекс по path, если его нет -->
+    <!-- 2. Create index if not exists -->
     <changeSet id="2" author="rik">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -143,7 +128,7 @@ spring:
         </createIndex>
     </changeSet>
 
-    <!-- 3. Альтернатива через SQL -->
+    <!-- 3. Alternative via SQL -->
     <changeSet id="3" author="rik">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -157,47 +142,44 @@ spring:
     </changeSet>
 
 </databaseChangeLog>
-```
-💡 Примечания:
-Liquibase автоматически применяет все изменения при старте приложения.
-Если колонка или индекс уже существуют, изменения пропускаются (onFail="MARK_RAN").
-Такой подход обеспечивает безопасное версионирование схемы базы данных и готовность проекта к развертыванию.
----
-# Дерево файлов проекта  
-```java
+💡 Notes:
+Liquibase automatically applies all pending changes at startup.
+If a column or index already exists, the change is skipped (onFail="MARK_RAN").
+This ensures safe DB schema versioning and deployment readiness.
+Project File Tree
 searchengine  
-├─ config/    # Конфигурации приложения  
-│   ├─ RickBotConfig.java    # Настройки бота обхода сайтов  
+├─ config/    # Application configurations  
+│   ├─ RickBotConfig.java  
 │   ├─ Site.java  
 │   └─ SiteList.java  
-├─ controllers/  # REST API и веб-контроллеры  
+├─ controllers/  # REST API and web controllers  
 │   ├─ ApiController.java  
 │   └─ DefaultController.java  
-├─ dto/      # DTO объекты для передачи данных  
+├─ dto/      # Data Transfer Objects  
 │   ├─ ApiResponse.java  
 │   ├─ PageResponse.java  
-|   ├─  statistics/  
-|   |   ├─ DetailedStatisticsItem.java  
-|   |   ├─ StatisticsData.java  
-│   |   ├─ StatisticsResponse.java  
-│   |   └─ TotalResponse.java  
-|   └─ earch/  
-│      ├─ SearchResponse.java  
-│      └─ SearchResult.java  
-├─ model/          # Сущности базы данных  
+│   ├─ statistics/  
+│   │   ├─ DetailedStatisticsItem.java  
+│   │   ├─ StatisticsData.java  
+│   │   ├─ StatisticsResponse.java  
+│   │   └─ TotalResponse.java  
+│   └─ search/  
+│       ├─ SearchResponse.java  
+│       └─ SearchResult.java  
+├─ model/          # Database entities  
 │   ├─ PageEntity.java  
 │   ├─ LemmaEntity.java  
 │   ├─ IndexEntity.java  
 │   ├─ SiteEntity.java  
 │   └─ Status.java  
-├─ repositories/  # JPA репозитории  
+├─ repositories/  # JPA repositories  
 │   ├─ PageRepository.java  
 │   ├─ LemmaRepository.java  
 │   ├─ IndexRepository.java  
-│   └─ SiteRepository.java
-├─ log
-|   └─ LogTag.java
-├─ services/   # Реализация бизнес-логики  
+│   └─ SiteRepository.java  
+├─ log  
+│   └─ LogTag.java  
+├─ services/   # Business logic implementation  
 │   ├─ IndexingServiceImpl.java  
 │   ├─ PageIndexingServiceImpl.java  
 │   ├─ SearchServiceImpl.java  
@@ -206,65 +188,59 @@ searchengine
 │   ├─ LemmaFrequencyService.java  
 │   ├─ DataManager.java  
 │   ├─ ManagerTasks.java  
-|   ├─ serviceinterface/   # Интерфейсы сервисов  
-│   |  ├─ IndexingService.java  
-│   |  ├─ PageIndexingService.java  
-│   |  ├─ SearchService.java  
-│   |  └─ StatisticsService.java  
-|   ├─ tasks/   # Классы задач для многопоточной индексации  
-│   |  ├─ PageTask.java  
-│   |  ├─ SiteTask.java  
-│   |  └─ SitesTask.java  
-|   └─ utils/   # Вспомогательные классы и утилиты  
-│      ├─ EntityFactory.java  
-│      ├─ IndexingContext.java  
-│      ├─ LemmaFilter.java  
-│      ├─ ManagerJSOUP.java  
-│      ├─ RickBotClient.java  
-│      ├─ SearchBuilder.java  
-│      ├─ Stopwatch.java  
-│      └─ VisitedUrlStore.java  
-├─ Application.java   # Точка входа Spring Boot  
+│   ├─ serviceinterface/   # Service interfaces  
+│   │  ├─ IndexingService.java  
+│   │  ├─ PageIndexingService.java  
+│   │  ├─ SearchService.java  
+│   │  └─ StatisticsService.java  
+│   ├─ tasks/   # Multithreaded indexing tasks  
+│   │  ├─ PageTask.java  
+│   │  ├─ SiteTask.java  
+│   │  └─ SitesTask.java  
+│   └─ utils/   # Helper classes and utilities  
+│       ├─ EntityFactory.java  
+│       ├─ IndexingContext.java  
+│       ├─ LemmaFilter.java  
+│       ├─ ManagerJSOUP.java  
+│       ├─ RickBotClient.java  
+│       ├─ SearchBuilder.java  
+│       ├─ Stopwatch.java  
+│       └─ VisitedUrlStore.java  
+├─ Application.java   # Spring Boot entry point  
 └─ resources/  
-    ├─ db/changelog/   # Скрипты Liquibase  
+    ├─ db/changelog/   # Liquibase scripts  
     │   └─ changelog-master.xml  
-    ├─ static/   # CSS, шрифты, фронтенд ресурсы  
+    ├─ static/   # CSS, fonts, frontend assets  
     │   └─ assets  
     │      ├─ css/  
     │      ├─ fonts/  
-    |      ├─ img/  
-    |      ├─ js/  
-    |      └─ plg/  
-    ├─ templates/  # Шаблоны Thymeleaf  
+    │      ├─ img/  
+    │      ├─ js/  
+    │      └─ plg/  
+    ├─ templates/  # Thymeleaf templates  
     │   └─ index.html  
-    └─ application.yml  # Конфигурация приложения  
-```
-## Как пользоваться API
----
-Все методы доступны по базовому пути: http://localhost:8080/api. Ниже приведены основные эндпоинты и примеры использования.
-1. Запуск индексации всех сайтов
+    └─ application.yml  # Application configuration  
+Using the API
+All endpoints are available under the base path:
+http://localhost:8080/api
+Start indexing all sites
 GET /api/startIndexing
-Пример запроса:
+Example:
 curl -X GET http://localhost:8080/api/startIndexing
-Ответ:
-
-```json
+Response:
 {
   "result": true,
   "error": null
 }
-```
-2. Остановка индексации
+Stop indexing
 GET /api/stopIndexing
-Пример запроса:
+Example:
 curl -X GET http://localhost:8080/api/stopIndexing
-3. Получение статистики
+Get statistics
 GET /api/statistics
-Пример запроса:
+Example:
 curl -X GET http://localhost:8080/api/statistics
-Пример ответа:
-
-```json
+Response:
 {
   "totalPages": 120,
   "totalLemmas": 4500,
@@ -281,32 +257,28 @@ curl -X GET http://localhost:8080/api/statistics
     }
   ]
 }
-```
-4. Индексация конкретной страницы
+Index a single page
 POST /api/indexPage?url={URL}
-Пример запроса:
+Example:
 curl -X POST "http://localhost:8080/api/indexPage?url=https://nikoartgallery.com/art1"
-5. Поиск по сайту или запросу
-GET /api/search?query={запрос}&site={сайт}&offset=0&limit=20
-Пример запроса:
+Search by query or site
+GET /api/search?query={query}&site={site}&offset=0&limit=20
+Example:
 curl -X GET "http://localhost:8080/api/search?query=картина&site=https://nikoartgallery.com"
-Пример ответа:
-
-```json
+Response:
 {
   "result": true,
   "count": 5,
   "data": [
     {
-      "title": "Картина «Закат»",
-      "snippet": "Картина «Закат» выполнена маслом на холсте. Это одна из самых известных работ художника...",
+      "title": "Painting 'Sunset'",
+      "snippet": "The painting 'Sunset' is an oil on canvas — one of the artist’s most well-known works...",
       "url": "https://nikoartgallery.com/art1"
     },
     {
-      "title": "Картина «Утро»",
-      "snippet": "Утренний пейзаж отражает нежные оттенки неба и света, создавая атмосферу спокойствия...",
+      "title": "Painting 'Morning'",
+      "snippet": "The morning landscape captures soft tones of light and sky, evoking a calm atmosphere...",
       "url": "https://nikoartgallery.com/art2"
     }
   ]
 }
-```
