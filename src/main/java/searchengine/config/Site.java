@@ -3,21 +3,21 @@ package searchengine.config;
 import lombok.Data;
 
 /**
- * Класс Site представляет информацию о сайте.
+ * The Site class represents information about a website.
  * <p>
- * Содержит URL и название сайта.
+ * Contains the website’s URL and its display name.
  */
 
 @Data
 public class Site {
 
     /**
-     * URL сайта, например: "https://example.com"
+     * Website URL, for example: "https://example.com"
      */
     private String url;
-
+    
     /**
-     * Название сайта для отображения в интерфейсе или логах
+     * Website name for display in the interface or logs
      */
     private String name;
 }
