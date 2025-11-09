@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Конфигурационный бин, содержащий список сайтов для индексации.
+ * Configuration bean containing a list of websites to be indexed.
  * <p>
- * Список загружается из application.yml / application.properties
- * с префиксом {@code indexing-settings}.
+ * The list is loaded from application.yml / application.properties
+ * with the prefix {@code indexing-settings}.
  */
 
 @Getter
@@ -20,8 +20,8 @@ import java.util.List;
 public class SitesList {
 
     /**
-     * Список сайтов для индексации.
-     * Каждый сайт представлен объектом {@link Site}.
+     * List of websites to be indexed.
+     * Each website is represented by a {@link Site} object.
      */
     private List<Site> sites;
 }
