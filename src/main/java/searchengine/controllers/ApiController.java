@@ -21,17 +21,17 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
- * Контроллер API для управления индексацией сайтов, поиском и статистикой.
+ * API controller for managing site indexing, search, and statistics.
  * <p>
- * Основные функции:
+ * Main features:
  * <ul>
- *     <li>Запуск и остановка индексации всех сайтов</li>
- *     <li>Индексация конкретной страницы по URL</li>
- *     <li>Получение статистики по индексированию</li>
- *     <li>Поиск по сайтам и запросам</li>
+ *     <li>Start and stop indexing of all configured sites</li>
+ *     <li>Index a specific page by its URL</li>
+ *     <li>Retrieve site indexing statistics</li>
+ *     <li>Perform searches across sites and queries</li>
  * </ul>
  * <p>
- * Аннотация {@link Tag} используется для группировки методов в Swagger/OpenAPI UI.
+ * The {@link Tag} annotation is used for grouping methods in Swagger/OpenAPI UI.
  */
 
 @Tag(name = "API", description = "Методы индексации, поиска и статистики")
@@ -40,21 +40,20 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class ApiController {
+    
     private static final LogTag TAG = LogTag.API;
     private final StatisticsService statisticsService;
     private final IndexingServiceImpl indexingService;
     private final SearchServiceImpl searchService;
     private final PageIndexingServiceImpl pageIndexingService;
 
-
     /**
-     * Запускает индексацию всех сайтов, указанных в конфигурации.
-     * <p>
-     * Проверяет, не запущена ли уже индексация. Если индексация уже запущена,
-     * возвращает {@link HttpStatus#BAD_REQUEST}.
-     *
-     * @return {@link ResponseEntity} с {@link ApiResponse} об успешности операции.
-     */
+    * Starts indexing of all sites specified in the configuration file.
+    * <p>
+    * Checks if indexing is already running. If it is, returns {@link HttpStatus#BAD_REQUEST}.
+    *
+    * @return {@link ResponseEntity} with {@link ApiResponse} indicating whether the operation was successful.
+    */
     @Operation(summary = "Запуск индексации всех сайтов")
     @GetMapping("/startIndexing")
     public ResponseEntity<ApiResponse> startIndexing() {
@@ -68,12 +67,12 @@ public class ApiController {
     }
 
     /**
-     * Останавливает текущую индексацию всех сайтов.
-     * <p>
-     * Если индексация не запущена, возвращает {@link HttpStatus#BAD_REQUEST}.
-     *
-     * @return {@link ResponseEntity} с {@link ApiResponse} об успешности операции.
-     */
+    * Stops the current indexing process of all sites.
+    * <p>
+    * If indexing is not running, returns {@link HttpStatus#BAD_REQUEST}.
+    *
+    * @return {@link ResponseEntity} with {@link ApiResponse} indicating whether the operation was successful.
+    */
     @Operation(summary = "Остановка индексации")
     @GetMapping("/stopIndexing")
     public ResponseEntity<ApiResponse> stopIndexing() {
@@ -88,10 +87,10 @@ public class ApiController {
     }
 
     /**
-     * Возвращает статистику по индексированию сайтов.
-     *
-     * @return {@link ResponseEntity} с объектом {@link StatisticsResponse}.
-     */
+    * Returns statistics about site indexing.
+    *
+    * @return {@link ResponseEntity} containing a {@link StatisticsResponse} object.
+    */
     @Operation(summary = "Получение статистики по индексированию")
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
@@ -100,14 +99,13 @@ public class ApiController {
     }
 
     /**
-     * Индексирует конкретную страницу по указанному URL.
-     * <p>
-     * Если страница находится за пределами сайтов, указанных в конфигурации,
-     * возвращает {@link HttpStatus#BAD_REQUEST}.
-     *
-     * @param url URL страницы для индексации, не может быть пустым
-     * @return {@link ResponseEntity} с {@link ApiResponse} об успешности операции.
-     */
+    * Indexes a specific page by the given URL.
+    * <p>
+    * If the page is outside the configured sites, returns {@link HttpStatus#BAD_REQUEST}.
+    *
+    * @param url the URL of the page to index; must not be blank
+    * @return {@link ResponseEntity} with {@link ApiResponse} indicating whether the operation was successful.
+    */
     @Operation(summary = "Индексация конкретной страницы")
     @PostMapping("/indexPage")
     public ResponseEntity<ApiResponse> indexPage(@RequestParam("url") @NotBlank String url) {
@@ -124,17 +122,17 @@ public class ApiController {
     }
 
     /**
-     * Выполняет поиск по сайту или по всему индексу.
-     * <p>
-     * Если запрос пустой, возвращает {@link HttpStatus#BAD_REQUEST}.
-     * Если ничего не найдено, возвращает {@link HttpStatus#NOT_FOUND}.
-     *
-     * @param query  поисковый запрос (не обязателен, но пустой не допускается)
-     * @param site   сайт для поиска (не обязателен)
-     * @param offset смещение результатов (по умолчанию 0)
-     * @param limit  количество результатов (по умолчанию 20)
-     * @return {@link ResponseEntity} с {@link SearchResponse} или {@link ApiResponse} с ошибкой.
-     */
+    * Performs a search across a specific site or the entire index.
+    * <p>
+    * If the query is empty, returns {@link HttpStatus#BAD_REQUEST}.
+    * If no results are found, returns {@link HttpStatus#NOT_FOUND}.
+    *
+    * @param query  the search query (optional but must not be empty)
+    * @param site   the site to search within (optional)
+    * @param offset result offset (default is 0)
+    * @param limit  number of results (default is 20)
+    * @return {@link ResponseEntity} containing a {@link SearchResponse} or an {@link ApiResponse} with an error.
+    */
     @Operation(summary = "Поиск по сайту/запросу")
     @GetMapping("/search")
     public ResponseEntity<ApiResponse> search(
@@ -164,12 +162,12 @@ public class ApiController {
     }
 
     /**
-     * Вспомогательный метод для формирования ответа с ошибкой.
-     *
-     * @param message сообщение об ошибке
-     * @param status  HTTP статус
-     * @return {@link ResponseEntity} с {@link ApiResponse}
-     */
+    * Helper method for building an error response.
+    *
+    * @param message the error message
+    * @param status  the HTTP status
+    * @return {@link ResponseEntity} containing an {@link ApiResponse}
+    */
     private ResponseEntity<ApiResponse> error(String message, HttpStatus status) {
         return ResponseEntity.status(status).body(new ApiResponse(false, message));
     }
