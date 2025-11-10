@@ -4,12 +4,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Главный класс запуска Spring Boot приложения.
+ * The main class that launches the Spring Boot application.
  * <p>
- * Основные функции:
+ * Main functions:
  * <ul>
- *     <li>Точка входа в приложение</li>
- *     <li>Автоматическая конфигурация Spring Boot через {@link SpringBootApplication}</li>
+ *     <li>Entry point of the application</li>
+ *     <li>Automatic Spring Boot configuration via {@link SpringBootApplication}</li>
  * </ul>
  */
 
@@ -18,12 +18,12 @@ public class Application {
     public static void main(String[] args) {
 
         /**
-         * Точка входа в приложение Spring Boot.
-         * <p>
-         * Метод вызывает {@link SpringApplication#run(Class, String[])} для запуска контекста Spring.
-         *
-         * @param args аргументы командной строки (опционально)
-         */
+        * Entry point of the Spring Boot application.
+        * <p>
+        * This method calls {@link SpringApplication#run(Class, String[])} to launch the Spring context.
+        *
+        * @param args command-line arguments (optional)
+        */
         SpringApplication.run(Application.class, args);
     }
 }
