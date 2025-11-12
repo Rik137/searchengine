@@ -16,7 +16,6 @@ import searchengine.services.IndexingServiceImpl;
 import searchengine.services.PageIndexingServiceImpl;
 import searchengine.services.SearchServiceImpl;
 import searchengine.services.serviceinterfaces.StatisticsService;
-
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -34,7 +33,7 @@ import java.util.List;
  * The {@link Tag} annotation is used for grouping methods in Swagger/OpenAPI UI.
  */
 
-@Tag(name = "API", description = "Методы индексации, поиска и статистики")
+@Tag(name = "API", description = "Endpoints for indexing, searching, and statistics")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -54,13 +53,13 @@ public class ApiController {
     *
     * @return {@link ResponseEntity} with {@link ApiResponse} indicating whether the operation was successful.
     */
-    @Operation(summary = "Запуск индексации всех сайтов")
+    @Operation(summary = "Start indexing all websites")
     @GetMapping("/startIndexing")
     public ResponseEntity<ApiResponse> startIndexing() {
-        log.info("{}  запущен метод: GET /startIndexing", TAG);
+        log.info("{} endpoint called: GET /startIndexing", TAG);
         if (indexingService.isIndexing()) {
-            log.warn("{}  Попытка запустить индексацию при уже запущенном процессе", TAG);
-            return error("Индексация уже запущена", HttpStatus.BAD_REQUEST);
+            log.warn("{} Attempt to start indexing while it is already in progress", TAG);
+            return error("Indexing is already in progress", HttpStatus.BAD_REQUEST);
         }
         indexingService.startIndexing();
         return ResponseEntity.ok(new ApiResponse(true, null));
@@ -73,15 +72,15 @@ public class ApiController {
     *
     * @return {@link ResponseEntity} with {@link ApiResponse} indicating whether the operation was successful.
     */
-    @Operation(summary = "Остановка индексации")
+    @Operation(summary = "Stop the indexing process")
     @GetMapping("/stopIndexing")
     public ResponseEntity<ApiResponse> stopIndexing() {
-        log.info("запущен метод: GET /stopIndexing");
+        log.info("Endpoint called: GET /stopIndexing");
         if (!indexingService.isIndexing()) {
-            log.warn("{}  Попытка остановить индексацию, которая не запущена", TAG);
-            return error("Индексация не запущена", HttpStatus.BAD_REQUEST);
+            log.warn("{} Attempt to stop indexing when no process is running", TAG);
+           return error("Indexing has not been started", HttpStatus.BAD_REQUEST);
         }
-        log.warn("{}  попытка остановить индексацию", TAG);
+            log.warn("{} An attempt to stop indexing was made", TAG);
             indexingService.stopIndexing();
             return ResponseEntity.ok(new ApiResponse(true, null));
     }
@@ -91,10 +90,10 @@ public class ApiController {
     *
     * @return {@link ResponseEntity} containing a {@link StatisticsResponse} object.
     */
-    @Operation(summary = "Получение статистики по индексированию")
+    @Operation(summary = "Retrieve indexing statistics")
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
-        log.info("{}  Вызов метода GET /statistics", TAG);
+        log.info("{} Endpoint called: GET /statistics", TAG);
         return ResponseEntity.ok(statisticsService.getStatistics());
     }
 
@@ -106,18 +105,18 @@ public class ApiController {
     * @param url the URL of the page to index; must not be blank
     * @return {@link ResponseEntity} with {@link ApiResponse} indicating whether the operation was successful.
     */
-    @Operation(summary = "Индексация конкретной страницы")
+    @Operation(summary = "Index a single page")
     @PostMapping("/indexPage")
     public ResponseEntity<ApiResponse> indexPage(@RequestParam("url") @NotBlank String url) {
-        log.info("{}  запущен метод: Post /indexPage", TAG);
-        log.info("{}  Запуск индексации страницы {}", TAG, url);
+        log.info("{} Endpoint called: POST /indexPage", TAG);
+        log.info("{} Indexing page started: {}", TAG, url);
         boolean indexed =  pageIndexingService.indexPage(url);
         if (!indexed) {
-            log.warn("{}  Индексация страницы {} не выполнена", TAG, url);
-            return error("Данная страница находится за пределами сайтов, указанных в конфигурационном файле",
-                    HttpStatus.BAD_REQUEST);
+            log.warn("{} Indexing of page {} was not performed", TAG, url);
+            return error("The page is outside the configured sites in the configuration file",
+            HttpStatus.BAD_REQUEST);
         }
-        log.info("{} Индексация страницы {} прошла успешно", TAG, url);
+        log.info("{} Successfully indexed page {}", TAG, url);
         return ResponseEntity.ok(new ApiResponse(true, null));
     }
 
@@ -133,31 +132,31 @@ public class ApiController {
     * @param limit  number of results (default is 20)
     * @return {@link ResponseEntity} containing a {@link SearchResponse} or an {@link ApiResponse} with an error.
     */
-    @Operation(summary = "Поиск по сайту/запросу")
+    @Operation(summary = "Search within a site or by query")
     @GetMapping("/search")
     public ResponseEntity<ApiResponse> search(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String site,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "20") int limit) {
-        log.info("{} Запущен метод /api/search с параметрами: query={}, site={}, offset={}, limit={}", TAG,
-                query, site, offset, limit);
+        log.info("{} Endpoint /api/search called with parameters: query={}, site={}, offset={}, limit={}", TAG,
+          query, site, offset, limit);
         if (query == null || query.trim().isEmpty()) {
-            return error("Задан пустой поисковый запрос", HttpStatus.BAD_REQUEST);
+            return error("Search query cannot be empty", HttpStatus.BAD_REQUEST);
         }
         try {
            List<SearchResult> results = searchService.search(query, site, offset, limit);
             if (results.isEmpty()) {
-                return error("По запросу ничего не найдено", HttpStatus.NOT_FOUND);
+               return error("Nothing found for the given query", HttpStatus.NOT_FOUND);
             }
-            log.info("{} Поиск завершён: найдено {} результатов", TAG, results.size());
+            log.info("{} Search finished: {} results returned", TAG, results.size());
             return ResponseEntity.ok(new SearchResponse(true, results.size(), results));
         }catch (IllegalStateException e) {
-            log.warn("{}  Ошибка поиска: {}", TAG, e.getMessage());
+            log.warn("{} An error occurred during search: {}", TAG, e.getMessage());
             return error(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            log.error("{}  Внутренняя ошибка поиска", TAG, e);
-            return error("Внутренняя ошибка сервера", HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error("{} An internal error occurred during search", TAG, e);
+            return error("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
