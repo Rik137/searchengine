@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * DTO, представляющее результат загрузки страницы.
+ * DTO representing the result of a page fetch.
  */
 
 @Getter
@@ -12,17 +12,17 @@ import lombok.Getter;
 public class PageResponse {
 
     /**
-     * HTTP-статус ответа.
-     */
+    * HTTP status of the response.
+    */
     private final int statusCode;
 
     /**
-     * Содержимое страницы (HTML или текст).
-     */
+    * Page content (HTML or plain text).
+    */
     private final String body;
 
     /**
-     * Флаг, указывающий, является ли содержимое HTML.
-     */
+    * Flag indicating whether the content is HTML.
+    */
     private final boolean isHtml;
 }
