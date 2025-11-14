@@ -6,9 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO, представляющий один результат поиска.
+ * DTO representing a single search result.
  * <p>
- * Используется в составе {@link SearchResponse}.
+ * Used as part of {@link SearchResponse}.
  */
 
 @Data
@@ -18,32 +18,32 @@ import lombok.NoArgsConstructor;
 public class SearchResult {
 
     /**
-     * URL сайта, на котором найден результат.
-     */
+    * URL of the website where the result was found.
+    */
     private String site;
 
     /**
-     * Название сайта (из конфигурации или мета-тегов).
-     */
+    * Name of the website (from configuration or meta tags).
+    */
     private String siteName;
 
     /**
-     * Относительный URI страницы (например, "/news/123").
-     */
+    * Relative URI of the page (e.g., "/news/123").
+    */
     private String uri;
 
     /**
-     * Заголовок страницы (title HTML-документа).
-     */
+    * Page title (HTML document title).
+    */
     private String title;
 
     /**
-     * Краткий фрагмент текста, где встречается запрос (сниппет).
-     */
+    * Short text fragment where the query appears (snippet).
+    */
     private String snippet;
 
     /**
-     * Релевантность результата (используется для сортировки).
-     */
+    * Relevance of the result (used for sorting).
+    */
     private float relevance;
 }
