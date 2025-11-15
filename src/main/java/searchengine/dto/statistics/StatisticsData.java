@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
-* Core data structure for the statistics response.
+* Core data structure for the statistics response
 */
 
 @Data
@@ -17,7 +17,7 @@ public class StatisticsData {
     private TotalStatistics total;
 
     /**
-    * Detailed data for each site.
+    * Detailed data for each site
     */
     private List<DetailedStatisticsItem> detailed;
 }
