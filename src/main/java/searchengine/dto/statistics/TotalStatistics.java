@@ -3,29 +3,29 @@ package searchengine.dto.statistics;
 import lombok.Data;
 
 /**
- * Сводная статистика по всем сайтам.
- */
+* Aggregate statistics across all sites
+*/
 
 @Data
 public class TotalStatistics {
 
     /**
-     * Общее количество сайтов, добавленных в систему.
-     */
+    * Total number of sites added to the system
+    */
     private int sites;
 
     /**
-     * Общее количество проиндексированных страниц.
-     */
+    * Total number of indexed pages.
+    */
     private int pages;
 
     /**
-     * Общее количество лемм (уникальных словоформ) в индексе.
-     */
+    * Total number of lemmas (unique word forms) in the index.
+    */
     private int lemmas;
 
     /**
-     * Флаг, показывающий, выполняется ли сейчас индексация.
-     */
+    * Flag indicating whether indexing is currently in progress.
+    */
     private boolean indexing;
 }
