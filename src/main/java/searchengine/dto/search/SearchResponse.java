@@ -26,12 +26,12 @@ import java.util.List;
 public class SearchResponse extends ApiResponse {
 
     /**
-    * Number of results found.
+    * Number of results found
     */
     private int count;
 
     /**
-    * List of results found.
+    * List of results found
     */
     private List<SearchResult> data;
     
