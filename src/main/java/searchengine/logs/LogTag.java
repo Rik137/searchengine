@@ -1,8 +1,8 @@
 package searchengine.logs;
 
 /**
- * Enum для тегов логов. Используется для унифицированного префикса в логах,
- * чтобы быстро определять подсистему или компонент, откуда пришло сообщение.
+ * Enum for log tags. Used as a unified prefix in logs
+ * to quickly identify the subsystem or component from which the message originated.
  */
 
 public enum LogTag {
