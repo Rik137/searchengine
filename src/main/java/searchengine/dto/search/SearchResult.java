@@ -18,32 +18,32 @@ import lombok.NoArgsConstructor;
 public class SearchResult {
 
     /**
-    * URL of the website where the result was found.
+    * URL of the website where the result was found
     */
     private String site;
 
     /**
-    * Name of the website (from configuration or meta tags).
+    * Name of the website (from configuration or meta tags)
     */
     private String siteName;
 
     /**
-    * Relative URI of the page (e.g., "/news/123").
+    * Relative URI of the page (e.g., "/news/123")
     */
     private String uri;
 
     /**
-    * Page title (HTML document title).
+    * Page title (HTML document title)
     */
     private String title;
 
     /**
-    * Short text fragment where the query appears (snippet).
+    * Short text fragment where the query appears (snippet)
     */
     private String snippet;
 
     /**
-    * Relevance of the result (used for sorting).
+    * Relevance of the result (used for sorting)
     */
     private float relevance;
 }
