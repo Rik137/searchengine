@@ -5,9 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Base DTO for API responses.
+ * Base DTO for API responses
  * <p>
- * Used for all REST controller responses.
+ * Used for all REST controller responses
  */
 
 @Data
@@ -17,12 +17,12 @@ import lombok.NoArgsConstructor;
 public class ApiResponse {
     
     /**
-    * Operation result (true — success, false — failure).
+    * Operation result (true — success, false — failure)
     */
     private boolean result;
 
     /**
-    * Error message (null if the operation was successful).
+    * Error message (null if the operation was successful)
     */
     private String error;
 }
