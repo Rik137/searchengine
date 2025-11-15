@@ -3,29 +3,29 @@ package searchengine.dto.statistics;
 import lombok.Data;
 
 /**
- * Detailed statistics for each site.
+ * Detailed statistics for each site
  */
 
 @Data
 public class DetailedStatisticsItem {
 
     /**
-    * URL site.
+    * URL site
     */
     private String url;
 
     /**
-    * name site.
+    * name site
     */
     private String name;
 
     /**
-    * Current status (e.g., INDEXING, INDEXED, FAILED).
+    * Current status (INDEXING, INDEXED, FAILED)
     */
     private String status;
 
     /**
-    * Timestamp of the last status update (ms).
+    * Timestamp of the last status update (ms)
     */
     private long statusTime;
 
@@ -35,12 +35,12 @@ public class DetailedStatisticsItem {
     private String error;
 
     /**
-    * Number of indexed pages.
+    * Number of indexed pages
     */
     private int pages;
 
     /**
-    * Number of discovered lemmas.
+    * Number of discovered lemmas
     */
     private int lemmas;
 }
