@@ -3,19 +3,19 @@ package searchengine.dto.statistics;
 import lombok.Data;
 
 /**
- * Ответ API со статистикой индексации.
- */
+* API response containing indexing statistics.
+*/
 
 @Data
 public class StatisticsResponse {
 
     /**
-     * Результат выполнения запроса (true — успех).
-     */
+    * Result of the request execution (true means success).
+    */
     private boolean result;
 
     /**
-     * Статистические данные.
-     */
+    * Statistical data.
+    */
     private StatisticsData statistics;
 }
