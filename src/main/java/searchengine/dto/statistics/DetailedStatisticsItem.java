@@ -3,44 +3,44 @@ package searchengine.dto.statistics;
 import lombok.Data;
 
 /**
- * Подробная статистика по каждому сайту.
+ * Detailed statistics for each site.
  */
 
 @Data
 public class DetailedStatisticsItem {
 
     /**
-     * URL сайта.
-     */
+    * URL site.
+    */
     private String url;
 
     /**
-     * Название сайта.
-     */
+    * name site.
+    */
     private String name;
 
     /**
-     * Текущий статус (например: INDEXING, INDEXED, FAILED).
-     */
+    * Current status (e.g., INDEXING, INDEXED, FAILED).
+    */
     private String status;
 
     /**
-     * Время последнего обновления статуса (timestamp, мс).
-     */
+    * Timestamp of the last status update (ms).
+    */
     private long statusTime;
 
     /**
-     * Сообщение об ошибке (если есть).
-     */
+    * message about error
+    */
     private String error;
 
     /**
-     * Количество проиндексированных страниц.
-     */
+    * Number of indexed pages.
+    */
     private int pages;
 
     /**
-     * Количество найденных лемм.
-     */
+    * Number of discovered lemmas.
+    */
     private int lemmas;
 }
