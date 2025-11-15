@@ -5,19 +5,19 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Основная структура данных для статистического ответа.
- */
+* Core data structure for the statistics response.
+*/
 
 @Data
 public class StatisticsData {
 
     /**
-     * Сводная статистика по всем сайтам.
-     */
+    * Summary statistics for all sites
+    */
     private TotalStatistics total;
 
     /**
-     * Подробные данные по каждому сайту.
-     */
+    * Detailed data for each site.
+    */
     private List<DetailedStatisticsItem> detailed;
 }
