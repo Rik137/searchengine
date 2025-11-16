@@ -7,8 +7,8 @@ import javax.persistence.*;
 import java.util.List;
 
 /**
- * Сущность страницы сайта.
- * <p>Таблица: {@code pages}</p>
+ * Entity representing a website page.
+ * <p>Table: {@code pages}</p>
  */
 
 @Setter
@@ -21,30 +21,42 @@ import java.util.List;
 
 public class PageEntity {
 
-    /** Уникальный идентификатор записи. */
+    /** 
+    * Unique identifier of the page record
+    */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
-    /** Сайт, которому принадлежит страница */
+    /** 
+    * The site to which the page belongs
+    */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "site_id", nullable = false)
     private SiteEntity siteEntity;
 
-    /** Путь страницы (например: "/about") */
+    /** 
+    * Path of the page (e.g., "/about") 
+    */
     @Column(name = "path", nullable = false, columnDefinition = "TEXT")
     private String path;
 
-    /** HTTP-код ответа страницы */
+    /** 
+    * HTTP response code of the page 
+    */
     @Column(name = "code", nullable = false)
     private int code;
 
-    /** HTML-контент страницы */
+    /** 
+    * HTML content of the page
+    */
     @Column(name = "content", nullable = false, columnDefinition = "MEDIUMTEXT")
     private String content;
 
-    /** Индексы (леммы и их веса), связанные с этой страницей */
+    /** 
+    * Indexes (lemmas and their weights) associated with this page 
+    */
     @OneToMany(mappedBy = "pageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexEntity> indexEntityList;
 }
