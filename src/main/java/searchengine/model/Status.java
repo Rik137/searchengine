@@ -1,11 +1,11 @@
 package searchengine.model;
 
 /**
- * Статусы индексации сайта.
+ * Website indexing statuses.
  * <ul>
- *     <li>{@code INDEXING} — сайт в процессе индексации</li>
- *     <li>{@code INDEXED} — сайт успешно проиндексирован</li>
- *     <li>{@code FAILED} — произошла ошибка при индексации</li>
+ *     <li>{@code INDEXING} — the site is currently being indexed</li>
+ *     <li>{@code INDEXED} — the site has been successfully indexed</li>
+ *     <li>{@code FAILED} — an error occurred during indexing</li>
  * </ul>
  */
 
