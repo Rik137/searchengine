@@ -7,8 +7,8 @@ import javax.persistence.*;
 import java.util.List;
 
 /**
- * Сущность леммы (основной формы слова), используемая в индексации сайта.
- * <p>Таблица: {@code lemmas}</p>
+ * Entity representing a lemma (the base form of a word) used in website indexing.
+ * <p>Table: {@code lemmas}</p>
  */
 
 @Setter
@@ -18,26 +18,36 @@ import java.util.List;
 @Table(name = "lemmas")
 public class LemmaEntity {
 
-    /** Уникальный идентификатор записи. */
+    /** 
+    * Unique identifier of the entry
+    */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private int id;
 
-    /** Сайт, к которому относится лемма */
+    /** 
+    * The site to which the lemma belongs
+    */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "site_id", nullable = false)
     private SiteEntity siteEntity;
 
-    /** Текст леммы (например: "поиск") */
+    /** 
+    * The text of the lemma (e.g., "search") 
+    */
     @Column(name = "lemma", nullable = false, columnDefinition = "VARCHAR(255)")
     private String lemma;
 
-    /** Частота встречаемости леммы на сайте */
+    /** 
+    * Frequency of the lemma on the site 
+    */
     @Column(name = "frequency", nullable = false)
     private int frequency;
 
-    /** Список индексов, где используется данная лемма */
+    /** 
+    * List of indexes where this lemma is used
+    */
     @OneToMany(mappedBy = "lemmaEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexEntity> indexEntityList;
 }
