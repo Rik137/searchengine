@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Сущность сайта.
- * <p>Таблица: {@code sites}</p>
+ /**
+ * Entity representing a website.
+ * <p>Table: {@code sites}</p>
  */
 
 @Getter
@@ -21,38 +21,54 @@ import java.util.List;
 
 public class SiteEntity {
 
-    /** Уникальный идентификатор записи. */
+    /** 
+    * Unique identifier of the site record
+    */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private int id;
 
-    /** Статус индексации сайта */
+    /** 
+    * Indexing status of the site 
+    */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "ENUM('INDEXING', 'INDEXED', 'FAILED')")
     private Status status;
 
-    /** Время последнего обновления статуса */
+    /** 
+    * Time of the last status update 
+    */
     @Column(name = "status_time", nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime statusTime;
 
-    /** Текст ошибки последней индексации */
+    /** 
+    * Error message from the last indexing 
+    */
     @Column(name = "last_error", columnDefinition = "TEXT")
     private String lastError;
 
-    /** URL сайта */
+    /** 
+    * URL site
+    */
     @Column(name = "url", nullable = false, columnDefinition = "VARCHAR(255) ")
     private String url;
 
-    /** Название сайта */
+    /** 
+    * name site
+    */
     @Column(name = "name", nullable = false, columnDefinition = "VARCHAR(255)")
     private String name;
 
-    /** Список страниц сайта */
+    /**
+    * list pages of site
+    */
     @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<PageEntity> pageEntityList = new ArrayList<>();
 
-    /** Список лемм сайта */
+    /**
+    * list lemmas of site
+    */
     @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<LemmaEntity> lemmaEntityList = new ArrayList<>();
 }
