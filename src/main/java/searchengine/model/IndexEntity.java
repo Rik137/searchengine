@@ -3,12 +3,11 @@ package searchengine.model;
 import lombok.*;
 
 import javax.persistence.*;
-
 /**
- * Сущность, описывающая связь между страницей и леммой.
+ * Entity representing the relationship between a page and a lemma.
  * <p>
- * Таблица {@code search_indexes} хранит весовые коэффициенты (rank),
- * показывающие значимость леммы на конкретной странице.
+ * The {@code search_indexes} table stores weight coefficients (rank),
+ * indicating the significance of a lemma on a specific page.
  */
 
 @Getter
@@ -21,22 +20,30 @@ import javax.persistence.*;
 
 public class IndexEntity {
 
-    /** Уникальный идентификатор записи. */
+    /** 
+    *Unique identifier of the record
+    */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    /** Ссылка на страницу, где встречается лемма. */
+    /**
+    * Reference to the page where the lemma occurs
+    */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "page_id", nullable = false)
     private PageEntity pageEntity;
 
-    /** Ссылка на лемму, встречающуюся на странице. */
+    /** 
+    * Reference to the lemma occurring on the page
+    */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "lemma_id", nullable = false)
     private LemmaEntity lemmaEntity;
 
-    /** Вес (значимость) леммы на данной странице. */
+    /** 
+    * Weight (significance) of the lemma on this page
+    */
     @Column(name = "rank_value", nullable = false)
     private float rank;
 }
