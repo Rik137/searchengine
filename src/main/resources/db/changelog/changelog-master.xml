@@ -31,7 +31,4 @@
             CREATE INDEX idx_path ON pages (path(255));
         </sql>
     </changeSet>
-
-
-
 </databaseChangeLog>
