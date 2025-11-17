@@ -9,19 +9,19 @@ import searchengine.model.SiteEntity;
 import java.util.List;
 
 /**
- * Репозиторий для работы с сущностью {@link IndexEntity}.
- * <p>Содержит методы для получения индексов лемм и подсчета их встречаемости на сайтах.</p>
+ * Repository for working with the {@link IndexEntity} entity.
+ * <p>Contains methods for retrieving lemma indexes and counting their occurrences on websites.</p>
  */
 
 public interface IndexRepository extends JpaRepository<IndexEntity, Integer> {
 
-    /**
-     * Подсчитывает количество уникальных страниц сайта, где встречается указанная лемма.
-     *
-     * @param lemma лемма для поиска
-     * @param site сайт, на котором ищем лемму
-     * @return количество страниц с данной леммой
-     */
+   /**
+   * Counts the number of unique pages on a website where the specified lemma appears.
+   *
+   * @param lemma the lemma to search for
+   * @param site the website to search the lemma on
+   * @return the number of pages containing the given lemma
+   */
     @Query("SELECT COUNT(DISTINCT i.pageEntity.id) " +
             "FROM IndexEntity i " +
             "WHERE i.lemmaEntity = :lemma " +
@@ -29,13 +29,13 @@ public interface IndexRepository extends JpaRepository<IndexEntity, Integer> {
     int countPagesContainingLemma(@Param("lemma") LemmaEntity lemma,
                                   @Param("site") SiteEntity site);
 
-    /**
-     * Получает все индексы указанной леммы на конкретном сайте.
-     *
-     * @param lemma лемма для поиска
-     * @param site сайт, на котором ищем индексы
-     * @return список {@link IndexEntity} для данной леммы на сайте
-     */
+   /**
+   * Retrieves all indexes of the specified lemma on a particular website.
+   *
+   * @param lemma the lemma to search for
+   * @param site the website to search the indexes on
+   * @return a list of {@link IndexEntity} for the given lemma on the website
+   */
     @Query("SELECT i FROM IndexEntity i " +
             "WHERE i.lemmaEntity = :lemma " +
             "AND i.pageEntity.siteEntity = :site")
