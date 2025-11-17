@@ -7,33 +7,33 @@ import searchengine.model.SiteEntity;
 import java.util.Optional;
 
 /**
- * Репозиторий для работы с сущностью {@link SiteEntity}.
- * <p>Содержит методы для поиска, удаления и проверки существования сайтов.</p>
+ * Repository for working with the {@link SiteEntity} entity.
+ * <p>Contains methods for searching, deleting, and checking the existence of websites.</p>
  */
 
 @Repository
 public interface SiteRepository extends JpaRepository<SiteEntity, Integer> {
 
     /**
-     * Находит сайт по его URL.
-     *
-     * @param url URL сайта
-     * @return Optional с найденным сайтом
-     */
+    * Finds a website by its URL.
+    *
+    * @param url the URL of the website
+    * @return an Optional containing the found website
+    */
     Optional<SiteEntity> findByUrl(String url);
 
     /**
-     * Удаляет сайт по URL.
-     *
-     * @param url URL сайта
-     */
+    * Deletes a website by its URL.
+    *
+    * @param url the URL of the website
+    */
     void deleteByUrl(String url);
 
     /**
-     * Проверяет, существуют ли какие-либо сайты в базе.
-     *
-     * @return true, если есть хотя бы один сайт
-     */
+    * Checks whether any websites exist in the database.
+    *
+    * @return true if at least one website exists
+    */
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM SiteEntity s")
     boolean hasAnySites();
 }
