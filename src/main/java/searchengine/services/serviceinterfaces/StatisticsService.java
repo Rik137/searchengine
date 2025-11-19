@@ -2,16 +2,16 @@ package searchengine.services.serviceinterfaces;
 
 import searchengine.dto.statistics.StatisticsResponse;
 
-/**
- * Сервис для получения статистики по процессу индексации сайтов.
+ /**
+ * Service for retrieving statistics about the site indexing process.
  */
 
 public interface StatisticsService {
 
     /**
-     * Возвращает текущую статистику индексации.
-     *
-     * @return объект {@link StatisticsResponse} с данными статистики
-     */
+    * Returns the current indexing statistics.
+    *
+    * @return a {@link StatisticsResponse} object containing the statistics data
+    */
     StatisticsResponse getStatistics();
 }
