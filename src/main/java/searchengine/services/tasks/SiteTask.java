@@ -12,10 +12,11 @@ import java.util.List;
 import java.util.concurrent.RecursiveAction;
 import java.util.stream.Collectors;
 
-/**
- * Задача индексации одного сайта.
+ /**
+ * Task for indexing a single site.
  *
- * <p>Сохраняет дефолтный вариант сайта, получает страницы, создаёт задачи {@link PageTask} и считает вес лемм.
+ * <p>Saves the default version of the site, retrieves its pages, creates {@link PageTask} instances, 
+ * and calculates lemma weights.
  */
 
 @Slf4j
@@ -40,13 +41,13 @@ public class SiteTask extends RecursiveAction {
          context.getVisitedUrlStore().activateSite(siteEntity);
 
         try {
-            log.info("{}  Обработка сайта: {}", TAG, site.getUrl());
+           log.info("{} Processing site: {}", TAG, site.getUrl());
 
             List<String> pages = context.getManagerJSOUP().getLinksFromPage(site.getUrl(), site.getUrl());
 
             if (context.shouldStop("SiteTask-pages-" + site.getUrl())) return;
 
-            log.info("{}  Найдено {} внутренних ссылок на {}", TAG, pages.size(), site.getUrl());
+            log.info("{} Found {} internal links on {}", TAG, pages.size(), site.getUrl());
 
             List<PageTask> pageTasks = pages.stream()
                     .filter(context.getVisitedUrlStore()::visitUrl)
@@ -60,19 +61,21 @@ public class SiteTask extends RecursiveAction {
            boolean hasFailedPages = pageTasks.stream().anyMatch(PageTask::isCompletedAbnormally);
 
             if (hasFailedPages) {
-                failSite("Одна или несколько страниц завершились с ошибкой");
+               failSite("One or more pages finished with errors");
            } else {
                 siteEntity.setStatus(Status.INDEXED);
                 siteEntity.setLastError(null);
                 siteEntity.setStatusTime(LocalDateTime.now());
                 context.getDataManager().saveSite(siteEntity);
-                log.info("{}  идет подсчет веса лемм", TAG);
+                
+                log.info("{} Calculating lemma weights", TAG);
+
                 context.getLemmaFrequencyService().recalculateRankForAllSites(siteEntity);
-                log.info("{}  подсчет веса лемм завершен", TAG);
+                log.info("{} Lemma weight calculation completed", TAG);
             }
 
         }catch (Exception e) {
-            log.error("{}  Ошибка при обработке сайта {}: {}", TAG, site.getUrl(), e.getMessage(), e);
+            log.error("{} Error processing site {}: {}", TAG, site.getUrl(), e.getMessage(), e);
             failSite(e.getMessage());
         }
     }
