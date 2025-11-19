@@ -3,21 +3,21 @@ package searchengine.services.serviceinterfaces;
 import searchengine.dto.search.SearchResult;
 import java.util.List;
 
-/**
- * Сервис для выполнения поиска по сайтам и запросам.
+ /**
+ * Service for performing searches across sites and queries.
  */
 
 public interface SearchService {
 
    /**
-    * Выполняет поиск по указанному запросу и сайту.
-    *
-    * @param query  поисковый запрос
-    * @param site   URL сайта для ограничения поиска (может быть null)
-    * @param offset смещение результатов (для постраничного вывода)
-    * @param limit  максимальное количество результатов
-    * @return список объектов {@link SearchResult} с найденными результатами
-    * @throws IllegalStateException если поиск не может быть выполнен (например, индексация не завершена)
-    */
+   * Performs a search by the specified query and site.
+   *
+   * @param query   the search query
+   * @param site    the site URL to limit the search (may be null)
+   * @param offset  the result offset (for pagination)
+   * @param limit   the maximum number of results
+   * @return a list of {@link SearchResult} objects containing the found results
+   * @throws IllegalStateException if the search cannot be performed (for example, indexing is not completed)
+   */
    List<SearchResult> search (String query, String site, int offset, int limit) throws IllegalStateException;
 }
