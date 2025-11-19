@@ -1,15 +1,15 @@
 package searchengine.services.serviceinterfaces;
 
 /**
- * Сервис для индексации отдельных страниц по URL.
+ * Service for indexing individual pages by URL.
  */
 
 public interface PageIndexingService {
 
     /**
-     * Индексирует страницу по указанному URL.
-     * @param url URL страницы для индексации
-     * @return true, если страница успешно проиндексирована, false в случае ошибки
-     */
+    * Indexes a page by the specified URL.
+    * @param url the URL of the page to index
+    * @return true if the page was successfully indexed, false otherwise
+    */
     boolean indexPage(String url);
 }
