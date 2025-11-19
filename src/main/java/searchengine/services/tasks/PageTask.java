@@ -7,14 +7,13 @@ import searchengine.logs.LogTag;
 import searchengine.model.PageEntity;
 import searchengine.model.SiteEntity;
 import searchengine.services.util.IndexingContext;
-
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
-/**
- * Задача индексации одной страницы сайта.
+ /**
+ * Task for indexing a single page of a site.
  *
- * <p>Сохраняет страницу в БД, извлекает леммы и создаёт дочерние задачи для внутренних ссылок.
+ * <p>Saves the page to the database, extracts lemmas, and creates child tasks for internal links.</p>
  */
 
 @Slf4j
@@ -58,7 +57,7 @@ public class PageTask extends RecursiveAction {
             }
 
         } catch (Exception e) {
-            log.error("{}  Ошибка при обработке страницы {} возможно это изображение", TAG, url, e);
+            log.error("{} Error processing page {} — it might be an image", TAG, url, e);
         }
     }
 }
