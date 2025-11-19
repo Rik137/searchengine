@@ -1,19 +1,19 @@
 package searchengine.services.serviceinterfaces;
 
-/**
- * Сервис для управления процессом индексации сайтов.
- * <p>Определяет методы для запуска и остановки индексации.</p>
+ /**
+ * Service for managing the website indexing process.
+ * <p>Defines methods for starting and stopping indexing.</p>
  */
 
 public interface IndexingService {
 
     /**
-     * Запускает процесс индексации всех сайтов.
-     */
+    * Starts the indexing process for all sites.
+    */
     void startIndexing();
 
     /**
-     * Останавливает текущий процесс индексации.
-     */
+    * Stops the current indexing process.
+    */
     void stopIndexing();
 }
