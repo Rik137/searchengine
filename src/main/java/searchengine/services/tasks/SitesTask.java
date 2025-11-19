@@ -8,11 +8,11 @@ import searchengine.services.util.IndexingContext;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
-/**
- * Корневая задача индексации всех сайтов.
+ /**
+ * Root task for indexing all sites.
  *
- * <p>Используется ForkJoinPool для параллельной обработки сайтов.
- * Удаляет старые сайты перед повторной индексацией и создаёт задачи {@link SiteTask} для каждого сайта.
+ * <p>Uses a ForkJoinPool for parallel site processing.
+ * Deletes old sites before reindexing and creates {@link SiteTask} instances for each site.
  */
 
 @Slf4j
