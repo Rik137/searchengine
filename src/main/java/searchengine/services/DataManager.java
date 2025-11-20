@@ -16,10 +16,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * Менеджер работы с данными сущностей: Sites, Pages, Lemmas, Indexes.
+ * Manager for handling entity data: Sites, Pages, Lemmas, and Indexes.
  * <p>
- * Содержит методы поиска, сохранения и удаления сущностей, а также проверки наличия данных.
- * Логирование ошибок и операций осуществляется через {@link LogTag#DATA_MANAGER}.
+ * Provides methods for searching, saving, and deleting entities, as well as checking the presence of data.
+ * Error and operation logging is performed via {@link LogTag#DATA_MANAGER}.
  */
 
 @Service
@@ -32,8 +32,10 @@ public class DataManager {
     private final LemmaRepository lemmaRepository;
     private final PageRepository pageRepository;
     private final SiteRepository siteRepository;
-
-   /* Унифицированный обработчик ошибок */
+    
+    /**
+    * Unified error handler 
+    */
     private <T> T wrapOperation(Supplier<T> operation, String errorMsg, T defaultValue) {
         try {
             return operation.get();
@@ -43,56 +45,56 @@ public class DataManager {
         }
     }
 
-    // ==== SITE METHODS ====
+        // ==== SITE METHODS ====
 
     /**
-     * Получить все сайты.
-     *
-     * @return список всех SiteEntity
-     */
+    * Retrieve all sites.
+    *
+    * @return list of all SiteEntity objects
+    */
     @Transactional(readOnly = true)
     public List<SiteEntity> getAllSites() {
         return wrapOperation(siteRepository::findAll, "Ошибка при получении всех сайтов", Collections.emptyList());
     }
 
     /**
-     * Проверка, есть ли сайты в базе.
-     *
-     * @return true, если есть хотя бы один сайт
-     */
+    * Check whether any sites exist in the database.
+    *
+    * @return true if at least one site is present
+    */
     @Transactional(readOnly = true)
     public boolean hasSites() {
         return wrapOperation(siteRepository::hasAnySites, "Ошибка при проверке наличия сайтов", false);
     }
 
     /**
-     * Найти сайт по URL.
-     *
-     * @param url URL сайта
-     * @return Optional SiteEntity
-     */
+    * Find a site by its URL.
+    *
+    * @param url the site's URL
+    * @return an Optional containing the SiteEntity
+    */
     @Transactional(readOnly = true)
     public Optional<SiteEntity> findSite(String url) {
         return wrapOperation(() -> siteRepository.findByUrl(url), "Ошибка при поиске сайта с url=" + url, Optional.empty());
     }
 
     /**
-     * Найти сайт по ID.
-     *
-     * @param id идентификатор сайта
-     * @return Optional SiteEntity
-     */
+    * Find a site by its ID.
+    *
+    * @param id the site's identifier
+    * @return an Optional containing the SiteEntity
+    */
     @Transactional(readOnly = true)
     public Optional<SiteEntity> findSite(int id) {
         return wrapOperation(() -> siteRepository.findById(id), "Ошибка при поиске сайта с id=" + id, Optional.empty());
     }
 
     /**
-     * Сохранение сайта.
-     *
-     * @param site объект SiteEntity
-     * @return true при успешном сохранении
-     */
+    * Save a site.
+    *
+    * @param site the SiteEntity object
+    * @return true if the site was successfully saved
+    */
     @Transactional
     public boolean saveSite(SiteEntity site) {
         return wrapOperation(() -> {
@@ -103,11 +105,11 @@ public class DataManager {
     }
 
     /**
-     * Удаление сайта по объекту.
-     *
-     * @param site объект SiteEntity
-     * @return true при успешном удалении
-     */
+    * Delete a site by its object.
+    *
+    * @param site the SiteEntity object
+    * @return true if the site was successfully deleted
+    */
     @Transactional
     public boolean deleteSite(SiteEntity site) {
         return wrapOperation(() -> {
@@ -118,11 +120,11 @@ public class DataManager {
     }
 
     /**
-     * Удаление сайта по URL.
-     *
-     * @param url URL сайта
-     * @return true при успешном удалении
-     */
+    * Delete a site by its URL.
+    *
+    * @param url the site's URL
+    * @return true if the site was successfully deleted
+    */
     @Transactional
     public boolean deleteSite(String url) {
         return wrapOperation(() -> {
@@ -133,11 +135,11 @@ public class DataManager {
     }
 
     /**
-     * Удаление сайта по ID.
-     *
-     * @param id идентификатор сайта
-     * @return true при успешном удалении
-     */
+    * Delete a site by its ID.
+    *
+    * @param id the site's identifier
+    * @return true if the site was successfully deleted
+    */
     @Transactional
     public boolean deleteSiteById(int id) {
         return wrapOperation(() -> {
@@ -146,37 +148,36 @@ public class DataManager {
             return true;
         }, "Ошибка при удалении сайта с id=" + id, false);
     }
-
-    // ==== PAGE METHODS ====
+        // ==== PAGE METHODS ====
 
     /**
-     * Найти страницу по ID.
-     *
-     * @param id идентификатор страницы
-     * @return Optional PageEntity
-     */
+    * Find a page by ID.
+    *
+    * @param id page identifier
+    * @return Optional PageEntity
+    */
     @Transactional(readOnly = true)
     public Optional<PageEntity> findPage(int id) {
         return wrapOperation(() -> pageRepository.findById(id), "Ошибка при поиске страницы с id=" + id, Optional.empty());
     }
 
     /**
-     * Найти страницу по пути.
-     *
-     * @param path путь страницы
-     * @return Optional PageEntity
-     */
+    * Find a page by path.
+    *
+    * @param path page path
+    * @return Optional PageEntity
+    */
     @Transactional(readOnly = true)
     public Optional<PageEntity> findPathPage(String path) {
         return wrapOperation(() -> pageRepository.findByPath(path), "Ошибка при поиске страницы по пути " + path, Optional.empty());
     }
 
     /**
-     * Получить все страницы сайта.
-     *
-     * @param site объект SiteEntity
-     * @return список PageEntity
-     */
+    * Get all pages of a site.
+    *
+    * @param site SiteEntity object
+    * @return list of PageEntity
+    */
     @Transactional(readOnly = true)
     public List<PageEntity> getAllPagesBySite(SiteEntity site) {
         return wrapOperation(() -> pageRepository.findAllBySiteEntity(site),
@@ -184,11 +185,11 @@ public class DataManager {
     }
 
     /**
-     * Подсчёт страниц сайта.
-     *
-     * @param site объект SiteEntity
-     * @return количество страниц
-     */
+    * Count the pages of a site.
+    *
+    * @param site SiteEntity object
+    * @return number of pages
+    */
     @Transactional(readOnly = true)
     public int getCountPagesBySite(SiteEntity site) {
         return wrapOperation(() -> pageRepository.countBySiteId(site.getId()),
@@ -196,11 +197,11 @@ public class DataManager {
     }
 
     /**
-     * Сохранение страницы.
-     *
-     * @param page объект PageEntity
-     * @return true при успешном сохранении
-     */
+    * Save a page.
+    *
+    * @param page PageEntity object
+    * @return true if saved successfully
+    */
     @Transactional
     public boolean savePage(PageEntity page) {
         return wrapOperation(() -> {
@@ -211,11 +212,11 @@ public class DataManager {
     }
 
     /**
-     * Удаление страницы по объекту.
-     *
-     * @param page объект PageEntity
-     * @return true при успешном удалении
-     */
+    * Delete a page by object.
+    *
+    * @param page PageEntity object
+    * @return true if deleted successfully
+    */
     @Transactional
     public boolean deletePage(PageEntity page) {
         return wrapOperation(() -> {
@@ -226,11 +227,11 @@ public class DataManager {
     }
 
     /**
-     * Удаление страницы по ID.
-     *
-     * @param id идентификатор страницы
-     * @return true при успешном удалении
-     */
+    * Delete a page by ID.
+    *
+    * @param id page identifier
+    * @return true if deleted successfully
+    */
     @Transactional
     public boolean deletePage(int id) {
         return wrapOperation(() -> {
@@ -240,36 +241,35 @@ public class DataManager {
         }, "Ошибка при удалении страницы с id=" + id, false);
     }
 
-    // ==== LEMMA METHODS ====
+        // ==== LEMMA METHODS ====
 
     /**
-     * Проверка, есть ли леммы в базе.
-     *
-     * @return true, если есть хотя бы одна лемма
-     */
+    * Check if there are any lemmas in the database.
+    *
+    * @return true if at least one lemma exists
+    */
     @Transactional(readOnly = true)
     public boolean hasLemmas() {
         return wrapOperation(lemmaRepository::hasAnyLemmas, "Ошибка при проверке наличия лемм", false);
     }
-
     /**
-     * Найти лемму по ID.
-     *
-     * @param id идентификатор леммы
-     * @return Optional LemmaEntity
-     */
+    * Find a lemma by ID.
+    *
+    * @param id lemma identifier
+    * @return Optional LemmaEntity
+    */
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(int id) {
         return wrapOperation(() -> lemmaRepository.findById(id), "Ошибка при поиске леммы с id=" + id, Optional.empty());
     }
 
     /**
-     * Найти лемму по имени и ID сайта.
-     *
-     * @param lemma имя леммы
-     * @param siteId ID сайта
-     * @return Optional LemmaEntity
-     */
+    * Find a lemma by name and site ID.
+    *
+    * @param lemma lemma name
+    * @param siteId site ID
+    * @return Optional LemmaEntity
+    */
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(String lemma, int siteId) {
         return wrapOperation(() -> lemmaRepository.findByLemmaAndSiteId(lemma, siteId),
@@ -277,12 +277,12 @@ public class DataManager {
     }
 
     /**
-     * Найти лемму по имени и объекту сайта.
-     *
-     * @param lemma имя леммы
-     * @param site объект SiteEntity
-     * @return Optional LemmaEntity
-     */
+    * Find a lemma by name and site object.
+    *
+    * @param lemma lemma name
+    * @param site SiteEntity object
+    * @return Optional LemmaEntity
+    */
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(String lemma, SiteEntity site) {
         return wrapOperation(() -> lemmaRepository.findByLemmaAndSite(lemma, site),
@@ -290,11 +290,11 @@ public class DataManager {
     }
 
     /**
-     * Получить все леммы сайта.
-     *
-     * @param site объект SiteEntity
-     * @return список LemmaEntity
-     */
+    * Get all lemmas of a site.
+    *
+    * @param site SiteEntity object
+    * @return list of LemmaEntity
+    */
     @Transactional(readOnly = true)
     public List<LemmaEntity> findAllLemmasBySite(SiteEntity site) {
         return wrapOperation(() -> lemmaRepository.findAllBySite(site),
@@ -302,11 +302,11 @@ public class DataManager {
     }
 
     /**
-     * Получить список лемм по именам.
-     *
-     * @param names список имен
-     * @return список LemmaEntity
-     */
+    * Get a list of lemmas by their names.
+    *
+    * @param names list of names
+    * @return list of LemmaEntity
+    */
     @Transactional(readOnly = true)
     public List<LemmaEntity> findLemmas(List<String> names) {
         return wrapOperation(() -> lemmaRepository.findByLemmaIn(names),
@@ -314,12 +314,12 @@ public class DataManager {
     }
 
     /**
-     * Получить список лемм по именам на конкретном сайте.
-     *
-     * @param names список имен
-     * @param siteUrl URL сайта
-     * @return список LemmaEntity
-     */
+    * Get a list of lemmas by names for a specific site.
+    *
+    * @param names list of names
+    * @param siteUrl site URL
+    * @return list of LemmaEntity
+    */
     @Transactional(readOnly = true)
     public List<LemmaEntity> findLemmas(List<String> names, String siteUrl) {
         return wrapOperation(() -> lemmaRepository.findByLemmaInAndSiteEntity_Url(names, siteUrl),
@@ -327,11 +327,11 @@ public class DataManager {
     }
 
     /**
-     * Подсчёт лемм на сайте.
-     *
-     * @param site объект SiteEntity
-     * @return количество лемм
-     */
+    * Count lemmas on a site.
+    *
+    * @param site SiteEntity object
+    * @return number of lemmas
+    */
     @Transactional(readOnly = true)
     public int getCountLemmasBySite(SiteEntity site) {
         return wrapOperation(() -> lemmaRepository.countLemmasBySite(site.getId()),
@@ -339,11 +339,11 @@ public class DataManager {
     }
 
     /**
-     * Сохранение леммы.
-     *
-     * @param lemma объект LemmaEntity
-     * @return true при успешном сохранении
-     */
+    * Save a lemma.
+    *
+    * @param lemma LemmaEntity object
+    * @return true if saved successfully
+    */
     @Transactional
     public boolean saveLemma(LemmaEntity lemma) {
         return wrapOperation(() -> {
@@ -354,11 +354,11 @@ public class DataManager {
     }
 
     /**
-     * Удаление леммы по ID.
-     *
-     * @param id идентификатор леммы
-     * @return true при успешном удалении
-     */
+    * Delete a lemma by ID.
+    *
+    * @param id lemma identifier
+    * @return true if deleted successfully
+    */
     @Transactional
     public boolean deleteLemma(int id) {
         return wrapOperation(() -> {
@@ -368,14 +368,14 @@ public class DataManager {
         }, "Ошибка при удалении леммы с id=" + id, false);
     }
 
-    // ==== INDEX METHODS ====
+        // ==== INDEX METHODS ====
 
     /**
-     * Найти индекс по ID.
-     *
-     * @param id идентификатор индекса
-     * @return Optional IndexEntity
-     */
+    * Find an index by ID.
+    *
+    * @param id index identifier
+    * @return Optional IndexEntity
+    */
     @Transactional(readOnly = true)
     public Optional<IndexEntity> findIndex(int id) {
         return wrapOperation(() -> indexRepository.findById(id),
@@ -383,12 +383,12 @@ public class DataManager {
     }
 
     /**
-     * Получить все индексы леммы на конкретном сайте.
-     *
-     * @param lemma объект LemmaEntity
-     * @param site объект SiteEntity
-     * @return список IndexEntity
-     */
+    * Get all indexes of a lemma on a specific site.
+    *
+    * @param lemma LemmaEntity object
+    * @param site SiteEntity object
+    * @return list of IndexEntity
+    */
     @Transactional(readOnly = true)
     public List<IndexEntity> getAllIndexesBySite(LemmaEntity lemma, SiteEntity site) {
         return wrapOperation(() -> indexRepository.findIndexesByLemmaAndSite(lemma, site),
@@ -397,12 +397,12 @@ public class DataManager {
     }
 
     /**
-     * Подсчёт страниц, где встречается лемма на сайте.
-     *
-     * @param lemma объект LemmaEntity
-     * @param site объект SiteEntity
-     * @return количество страниц
-     */
+    * Count the pages where a lemma appears on a site.
+    *
+    * @param lemma LemmaEntity object
+    * @param site SiteEntity object
+    * @return number of pages
+    */
     @Transactional(readOnly = true)
     public int getCountPagesWhereLemma(LemmaEntity lemma, SiteEntity site) {
         return wrapOperation(() -> indexRepository.countPagesContainingLemma(lemma, site),
@@ -410,11 +410,11 @@ public class DataManager {
     }
 
     /**
-     * Сохранение одного индекса.
-     *
-     * @param index объект IndexEntity
-     * @return true при успешном сохранении
-     */
+    * Save a single index.
+    *
+    * @param index IndexEntity object
+    * @return true if saved successfully
+    */
     @Transactional
     public boolean saveIndex(IndexEntity index) {
         return wrapOperation(() -> {
@@ -425,11 +425,11 @@ public class DataManager {
     }
 
     /**
-     * Сохранение списка индексов.
-     *
-     * @param indexes список IndexEntity
-     * @return true при успешном сохранении
-     */
+    * Save a list of indexes.
+    *
+    * @param indexes list of IndexEntity
+    * @return true if saved successfully
+    */
     @Transactional
     public boolean saveIndex(List<IndexEntity> indexes) {
         return wrapOperation(() -> {
@@ -440,11 +440,11 @@ public class DataManager {
     }
 
     /**
-     * Удаление индекса по ID.
-     *
-     * @param id идентификатор индекса
-     * @return true при успешном удалении
-     */
+    * Delete an index by ID.
+    *
+    * @param id index identifier
+    * @return true if deleted successfully
+    */
     @Transactional
     public boolean deleteIndex(int id) {
         return wrapOperation(() -> {
