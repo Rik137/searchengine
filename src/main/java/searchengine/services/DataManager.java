@@ -54,7 +54,8 @@ public class DataManager {
     */
     @Transactional(readOnly = true)
     public List<SiteEntity> getAllSites() {
-        return wrapOperation(siteRepository::findAll, "Ошибка при получении всех сайтов", Collections.emptyList());
+        return wrapOperation(siteRepository::findAll, "Error retrieving all sites", 
+                             Collections.emptyList());
     }
 
     /**
@@ -64,7 +65,8 @@ public class DataManager {
     */
     @Transactional(readOnly = true)
     public boolean hasSites() {
-        return wrapOperation(siteRepository::hasAnySites, "Ошибка при проверке наличия сайтов", false);
+        return wrapOperation(siteRepository::hasAnySites, 
+                             "Error checking for existing sites", false);
     }
 
     /**
@@ -75,7 +77,8 @@ public class DataManager {
     */
     @Transactional(readOnly = true)
     public Optional<SiteEntity> findSite(String url) {
-        return wrapOperation(() -> siteRepository.findByUrl(url), "Ошибка при поиске сайта с url=" + url, Optional.empty());
+        return wrapOperation(() -> siteRepository.findByUrl(url), 
+                             "Error finding site with url = " + url, Optional.empty());
     }
 
     /**
@@ -86,7 +89,8 @@ public class DataManager {
     */
     @Transactional(readOnly = true)
     public Optional<SiteEntity> findSite(int id) {
-        return wrapOperation(() -> siteRepository.findById(id), "Ошибка при поиске сайта с id=" + id, Optional.empty());
+        return wrapOperation(() -> siteRepository.findById(id), 
+                             "Error finding site with id = " + id, Optional.empty());
     }
 
     /**
@@ -99,9 +103,9 @@ public class DataManager {
     public boolean saveSite(SiteEntity site) {
         return wrapOperation(() -> {
             siteRepository.save(site);
-            log.debug("{} Сайт {} сохранён", TAG, site);
+            log.debug("{} Site {} saved", TAG, site);
             return true;
-        }, "Ошибка при сохранении сайта " + site, false);
+        }, "Error saving site " + site, false);
     }
 
     /**
@@ -114,9 +118,9 @@ public class DataManager {
     public boolean deleteSite(SiteEntity site) {
         return wrapOperation(() -> {
             siteRepository.delete(site);
-            log.debug("{} Сайт с id={} удалён", TAG, site.getId());
+            log.debug("{} Site with id = {} deleted", TAG, site.getId());
             return true;
-        }, "Ошибка при удалении сайта с id=" + site.getId(), false);
+        }, "Error deleting site with id =" + site.getId(), false);
     }
 
     /**
@@ -129,9 +133,9 @@ public class DataManager {
     public boolean deleteSite(String url) {
         return wrapOperation(() -> {
             siteRepository.deleteByUrl(url);
-            log.debug("{} Сайт с url={} удалён", TAG, url);
+            log.debug("{} Site with url = {} deleted", TAG, url);
             return true;
-        }, "Ошибка при удалении сайта с url=" + url, false);
+        }, "Error deleting site with url =" + url, false);
     }
 
     /**
@@ -144,9 +148,9 @@ public class DataManager {
     public boolean deleteSiteById(int id) {
         return wrapOperation(() -> {
             siteRepository.deleteById(id);
-            log.debug("{} Сайт с id={} удалён", TAG, id);
+            log.debug("{} Site with id = {} deleted", TAG, id);
             return true;
-        }, "Ошибка при удалении сайта с id=" + id, false);
+        }, "Error deleting site with id = " + id, false);
     }
         // ==== PAGE METHODS ====
 
@@ -158,7 +162,8 @@ public class DataManager {
     */
     @Transactional(readOnly = true)
     public Optional<PageEntity> findPage(int id) {
-        return wrapOperation(() -> pageRepository.findById(id), "Ошибка при поиске страницы с id=" + id, Optional.empty());
+        return wrapOperation(() -> pageRepository.findById(id), 
+                             "Error deleting page with id =" + id, Optional.empty());
     }
 
     /**
@@ -169,7 +174,8 @@ public class DataManager {
     */
     @Transactional(readOnly = true)
     public Optional<PageEntity> findPathPage(String path) {
-        return wrapOperation(() -> pageRepository.findByPath(path), "Ошибка при поиске страницы по пути " + path, Optional.empty());
+        return wrapOperation(() -> pageRepository.findByPath(path), 
+                             "Error finding page by path" + path, Optional.empty());
     }
 
     /**
@@ -181,7 +187,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public List<PageEntity> getAllPagesBySite(SiteEntity site) {
         return wrapOperation(() -> pageRepository.findAllBySiteEntity(site),
-                "Ошибка при поиске страниц на сайте " + site.getId(), Collections.emptyList());
+                "Error retrieving pages of the site " + site.getId(), Collections.emptyList());
     }
 
     /**
@@ -193,7 +199,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public int getCountPagesBySite(SiteEntity site) {
         return wrapOperation(() -> pageRepository.countBySiteId(site.getId()),
-                "Ошибка при подсчёте страниц сайта " + site.getId(), 0);
+                "Error counting pages of the site " + site.getId(), 0);
     }
 
     /**
@@ -206,9 +212,9 @@ public class DataManager {
     public boolean savePage(PageEntity page) {
         return wrapOperation(() -> {
             pageRepository.save(page);
-            log.debug("{} Страница {} сохранена", TAG, page);
+            log.debug("{} pages {} saved", TAG, page);
             return true;
-        }, "Ошибка при сохранении страницы " + page, false);
+        }, "Error saving page " + page, false);
     }
 
     /**
@@ -221,9 +227,9 @@ public class DataManager {
     public boolean deletePage(PageEntity page) {
         return wrapOperation(() -> {
             pageRepository.delete(page);
-            log.debug("{} Страница с id={} удалена", TAG, page.getId());
+            log.debug("{} page with id = {} deleted", TAG, page.getId());
             return true;
-        }, "Ошибка при удалении страницы с id=" + page.getId(), false);
+        }, "Error deleting page with id=" + page.getId(), false);
     }
 
     /**
@@ -236,9 +242,9 @@ public class DataManager {
     public boolean deletePage(int id) {
         return wrapOperation(() -> {
             pageRepository.deleteById(id);
-            log.debug("{} Страница с id={} удалена", TAG, id);
+            log.debug("{} page с id = {} deleted ", TAG, id);
             return true;
-        }, "Ошибка при удалении страницы с id=" + id, false);
+        }, "Error deleting page with id = " + id, false);
     }
 
         // ==== LEMMA METHODS ====
@@ -250,7 +256,8 @@ public class DataManager {
     */
     @Transactional(readOnly = true)
     public boolean hasLemmas() {
-        return wrapOperation(lemmaRepository::hasAnyLemmas, "Ошибка при проверке наличия лемм", false);
+        return wrapOperation(lemmaRepository::hasAnyLemmas, 
+                             "Error checking for existing lemmas ", false);
     }
     /**
     * Find a lemma by ID.
@@ -260,7 +267,8 @@ public class DataManager {
     */
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(int id) {
-        return wrapOperation(() -> lemmaRepository.findById(id), "Ошибка при поиске леммы с id=" + id, Optional.empty());
+        return wrapOperation(() -> lemmaRepository.findById(id), 
+                             "Error finding lemma with id=" + id, Optional.empty());
     }
 
     /**
@@ -273,7 +281,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(String lemma, int siteId) {
         return wrapOperation(() -> lemmaRepository.findByLemmaAndSiteId(lemma, siteId),
-                "Ошибка при поиске леммы " + lemma + " на сайте " + siteId, Optional.empty());
+                "Error finding lemma " + lemma + " on the site " + siteId, Optional.empty());
     }
 
     /**
@@ -286,7 +294,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public Optional<LemmaEntity> findLemma(String lemma, SiteEntity site) {
         return wrapOperation(() -> lemmaRepository.findByLemmaAndSite(lemma, site),
-                "Ошибка при поиске леммы " + lemma + " на сайте " + site.getId(), Optional.empty());
+                "Error finding lemma " + lemma + " on the site " + site.getId(), Optional.empty());
     }
 
     /**
@@ -298,7 +306,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public List<LemmaEntity> findAllLemmasBySite(SiteEntity site) {
         return wrapOperation(() -> lemmaRepository.findAllBySite(site),
-                "Ошибка при поиске лемм на сайте " + site.getId(), Collections.emptyList());
+                "Error finding lemma " + site.getId(), Collections.emptyList());
     }
 
     /**
@@ -310,7 +318,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public List<LemmaEntity> findLemmas(List<String> names) {
         return wrapOperation(() -> lemmaRepository.findByLemmaIn(names),
-                "Ошибка при поиске лемм " + names, Collections.emptyList());
+                "Error finding lemma" + names, Collections.emptyList());
     }
 
     /**
@@ -323,7 +331,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public List<LemmaEntity> findLemmas(List<String> names, String siteUrl) {
         return wrapOperation(() -> lemmaRepository.findByLemmaInAndSiteEntity_Url(names, siteUrl),
-                "Ошибка при поиске лемм " + names + " на сайте " + siteUrl, Collections.emptyList());
+                "Error finding lemma " + names + " on the site " + siteUrl, Collections.emptyList());
     }
 
     /**
@@ -335,7 +343,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public int getCountLemmasBySite(SiteEntity site) {
         return wrapOperation(() -> lemmaRepository.countLemmasBySite(site.getId()),
-                "Ошибка при подсчёте лемм на сайте " + site.getId(), 0);
+                "Error counting lemmas on the site " + site.getId(), 0);
     }
 
     /**
@@ -348,9 +356,9 @@ public class DataManager {
     public boolean saveLemma(LemmaEntity lemma) {
         return wrapOperation(() -> {
             lemmaRepository.save(lemma);
-            log.debug("{} Лемма {} сохранена", TAG, lemma);
+            log.debug("{} lemma {} saved", TAG, lemma);
             return true;
-        }, "Ошибка при сохранении леммы " + lemma, false);
+        }, "Error saving lemma" + lemma, false);
     }
 
     /**
@@ -363,9 +371,9 @@ public class DataManager {
     public boolean deleteLemma(int id) {
         return wrapOperation(() -> {
             lemmaRepository.deleteById(id);
-            log.debug("{} Лемма с id={} удалена", TAG, id);
+            log.debug("{} lemma with id = {} удалена", TAG, id);
             return true;
-        }, "Ошибка при удалении леммы с id=" + id, false);
+        }, "Error deleting lemma with id = " + id, false);
     }
 
         // ==== INDEX METHODS ====
@@ -379,7 +387,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public Optional<IndexEntity> findIndex(int id) {
         return wrapOperation(() -> indexRepository.findById(id),
-                "Ошибка при поиске индекса с id=" + id, Optional.empty());
+                "Error finding index with id =" + id, Optional.empty());
     }
 
     /**
@@ -392,7 +400,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public List<IndexEntity> getAllIndexesBySite(LemmaEntity lemma, SiteEntity site) {
         return wrapOperation(() -> indexRepository.findIndexesByLemmaAndSite(lemma, site),
-                "Ошибка при поиске индексов на сайте c id=" + site.getId(),
+                "Error finding indexes on th site with id =" + site.getId(),
                 Collections.emptyList());
     }
 
@@ -406,7 +414,7 @@ public class DataManager {
     @Transactional(readOnly = true)
     public int getCountPagesWhereLemma(LemmaEntity lemma, SiteEntity site) {
         return wrapOperation(() -> indexRepository.countPagesContainingLemma(lemma, site),
-                "Ошибка при подсчёте страниц на сайте " + site.getId(), 0);
+            "Error counting pages on the site " + site.getId(), 0);
     }
 
     /**
@@ -419,9 +427,9 @@ public class DataManager {
     public boolean saveIndex(IndexEntity index) {
         return wrapOperation(() -> {
             indexRepository.save(index);
-            log.debug("{} Индекс {} сохранён", TAG, index);
+            log.debug("{} index {} saved", TAG, index);
             return true;
-        }, "Ошибка при сохранении индекса " + index, false);
+        }, "Error saving index " + index, false);
     }
 
     /**
@@ -434,9 +442,9 @@ public class DataManager {
     public boolean saveIndex(List<IndexEntity> indexes) {
         return wrapOperation(() -> {
             indexRepository.saveAll(indexes);
-            log.debug("{} Список индексов сохранён, count={}", TAG, indexes.size());
+            log.debug("{} index list saved, count = {}", TAG, indexes.size());
             return true;
-        }, "Ошибка при сохранении списка индексов", false);
+        }, "Error saving index list", false);
     }
 
     /**
@@ -449,8 +457,8 @@ public class DataManager {
     public boolean deleteIndex(int id) {
         return wrapOperation(() -> {
             indexRepository.deleteById(id);
-            log.debug("{} Индекс с id={} удалён", TAG, id);
+            log.debug("{} index with id = {} deleted", TAG, id);
             return true;
-        }, "Ошибка при удалении индекса с id=" + id, false);
+        }, "Error deleting index with id =" + id, false);
     }
 }
