@@ -8,11 +8,11 @@ import searchengine.services.serviceinterfaces.IndexingService;
 import searchengine.services.util.Stopwatch;
 
 /**
- * Реализация сервиса индексации сайтов.
+ * Implementation of the site indexing service.
  *
- * <p>Отвечает за запуск и остановку процесса индексации.
- * Использует {@link ManagerTasks} для управления задачами обхода и обработки страниц.
- * {@link Stopwatch} применяется для измерения времени выполнения полной индексации.
+ * <p>Responsible for starting and stopping the indexing process.
+ * Uses {@link ManagerTasks} to manage crawling and page-processing tasks.
+ * {@link Stopwatch} is used to measure the execution time of the full indexing run.
  */
 
 @Slf4j
@@ -24,32 +24,40 @@ public class IndexingServiceImpl implements IndexingService {
 
     private static final LogTag TAG = LogTag.INDEXING_SERVER;
 
-    /** Флаг состояния индексации (true — индексация идет). */
+    /** 
+    * Flag indicating the indexing state (true — indexing is in progress)
+    */
     private volatile boolean statusIndexing = false;
 
-    /** Менеджер задач для запуска и остановки процессов индексации. */
+    /** 
+    * Task manager responsible for starting and stopping indexing processes
+    */
     private final ManagerTasks managerTasks;
 
-    /** Таймер для измерения времени индексации. */
+    /** 
+    * Timer used to measure indexing duration
+    */
     private Stopwatch stopwatch = new Stopwatch();
 
-    /** Пул потоков для асинхронного запуска задач */
+    /** 
+    * Thread pool for asynchronous task execution
+    */
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
 
     /**
-     * Проверяет, выполняется ли в данный момент индексация.
-     *
-     * @return true, если индексация активна, иначе false
-     */
+    * Checks whether indexing is currently running.
+    *
+    * @return true if indexing is active, otherwise false
+    */
     public boolean isIndexing(){
         return statusIndexing;
     }
 
 
    /*
-    * Запускает процесс индексации всех сайтов.
-    */
+   * Starts the indexing process for all sites.
+   */
    @Override
    public void startIndexing() {
         if (isIndexing()) {
@@ -73,10 +81,11 @@ public class IndexingServiceImpl implements IndexingService {
             }
         });
     }
-
-    /**
-     * Останавливает текущую индексацию.
-     */@Override
+    
+   /**
+   * Stops the current indexing process.
+   */
+   @Override
     public void stopIndexing() {
         try {
             managerTasks.stopIndexingTask();
