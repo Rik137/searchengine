@@ -12,19 +12,19 @@ import searchengine.services.util.SearchBuilder;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Сервис для работы с леммами и индексами страниц.
+ /**
+ * Service for managing lemmas and page indexes.
  *
- * <p>Основные функции:
+ * <p>Main responsibilities:
  * <ul>
- *   <li>Сохранение лемм и индексов для страницы.</li>
- *   <li>Уменьшение частоты лемм при удалении или обновлении страницы.</li>
- *   <li>Пересчет относительного веса (ранга) лемм для поисковой релевантности.</li>
- *   <li>Поиск страниц по запросу с учетом частот лемм и пересечений.</li>
+ *   <li>Saves lemmas and indexes for a page.</li>
+ *   <li>Decreases lemma frequency when a page is removed or updated.</li>
+ *   <li>Recalculates the relative weight (rank) of lemmas for search relevance.</li>
+ *   <li>Searches for pages based on a query, considering lemma frequencies and intersections.</li>
  * </ul>
  *
- * <p>Используется {@link LemmaProcessor} для генерации лемм,
- * {@link DataManager} для работы с БД и {@link EntityFactory} для создания сущностей.
+ * <p>Uses {@link LemmaProcessor} for lemma generation,
+ * {@link DataManager} for database operations, and {@link EntityFactory} for entity creation.
  */
 
 @Service
@@ -40,12 +40,13 @@ public class LemmaFrequencyService {
     private static final double PERCENT = 30.0f;
 
     /**
-     * Уменьшает частоты всех лемм, встречающихся на странице.
-     * <p>Используется при удалении или обновлении страницы, чтобы поддерживать корректные
-     * частоты лемм в БД.
-     *
-     * @param page страница, для которой нужно уменьшить частоты
-     */
+    * Decreases the frequencies of all lemmas present on the page.
+    *
+    * <p>Used when a page is deleted or updated to keep lemma frequencies
+    * in the database consistent.
+    *
+    * @param page the page for which lemma frequencies should be decreased
+    */
     @Transactional
     public void decreaseLemmaFrequencies(PageEntity page) {
         String content = page.getContent();
@@ -78,11 +79,11 @@ public class LemmaFrequencyService {
     }
 
     /**
-     * Потокобезопасная версия {@link #savePageLemmasAndIndexes(PageEntity, String)}
-     *
-     * @param page страница для индексации
-     * @param content контент страницы
-     */
+    * Thread-safe version of {@link #savePageLemmasAndIndexes(PageEntity, String)}.
+    *
+    * @param page the page to be indexed
+    * @param content the page content
+    */
     @Transactional
     public void savePageLemmasAndIndexes(PageEntity page, String content) {
         if (content == null || content.isBlank()) {
@@ -115,21 +116,22 @@ public class LemmaFrequencyService {
     }
 
     /**
-     * Потокобезопасная версия {@link #savePageLemmasAndIndexes(PageEntity, String)}
-     *
-     * @param page страница для индексации
-     * @param content контент страницы
-     */
+    * Thread-safe version of {@link #savePageLemmasAndIndexes(PageEntity, String)}.
+    *
+    * @param page the page to be indexed
+    * @param content the page content
+    */
     public synchronized void savePageLemmasAndIndexesThreadSafe(PageEntity page, String content) {
         savePageLemmasAndIndexes(page, content);
     }
 
     /**
-     * Пересчитывает вес (ранг) лемм для всех страниц сайта.
-     * <p>Используется после полной индексации сайта или при перерасчете релевантности.
-     *
-     * @param site сайт для пересчета рангов
-     */
+    * Recalculates the weight (rank) of lemmas for all pages of the site.
+    *
+    * <p>Used after full site indexing or when recalculating relevance.
+    *
+    * @param site the site for which lemma ranks should be recalculated
+    */
     @Transactional
     public void recalculateRankForAllSites(SiteEntity site) {
         int totalPages = dataManager.getCountPagesBySite(site);
@@ -150,13 +152,13 @@ public class LemmaFrequencyService {
 
 
     /**
-     * Получает леммы из БД.
-     * <p>Если указан URL, фильтрует по сайту/странице; иначе возвращает все подходящие леммы.
-     *
-     * @param lemmas список лемм для поиска
-     * @param url сайт или конкретная страница (может быть null)
-     * @return список сущностей лемм из БД
-     */
+    * Retrieves lemmas from the database.
+    * <p>If a URL is provided, filters by site/page; otherwise returns all matching lemmas.
+    *
+    * @param lemmas list of lemmas to search for
+    * @param url the site or specific page (can be null)
+    * @return list of lemma entities from the database
+    */
     private List<LemmaEntity> getLemmaFromDataBase(List<String> lemmas, String url) {
         return (url == null || url.isBlank())
                 ? dataManager.findLemmas(lemmas)
@@ -164,14 +166,14 @@ public class LemmaFrequencyService {
     }
 
     /**
-     * Выполняет поиск страниц по запросу.
-     *
-     * @param query поисковый запрос
-     * @param url сайт (если null — поиск по всем сайтам)
-     * @param offset смещение для пагинации
-     * @param limit максимальное количество результатов
-     * @return список {@link SearchResult} с релевантными страницами
-     */
+    * Performs a search for pages by query.
+    *
+    * @param query the search query
+    * @param url the site (if null — search across all sites)
+    * @param offset pagination offset
+    * @param limit maximum number of results
+    * @return list of {@link SearchResult} with relevant pages
+    */
     public List<SearchResult> searchResult(String query, String url, int offset, int limit) {
         log.info("{}  Поиск запроса '{}' по сайту '{}'", TAG, query, url);
 
@@ -220,13 +222,13 @@ public class LemmaFrequencyService {
     }
 
     /**
-     * Находит индексы страниц для всех лемм.
-     * <p>Если указан URL, выполняет пересечение страниц по леммам для одного сайта; иначе объединяет все страницы по леммам.
-     *
-     * @param lemmas список лемм
-     * @param url сайт или null
-     * @return список индексов страниц
-     */
+    * Finds page indexes for all lemmas.
+    * <p>If a URL is provided, intersects pages by lemmas for a single site; otherwise merges all pages by lemmas.
+    *
+    * @param lemmas list of lemmas
+    * @param url the site or null
+    * @return list of page indexes
+    */
     private List<IndexEntity> findIndexesForAllLemmas(List<LemmaEntity> lemmas, String url) {
         if (lemmas.isEmpty()) return List.of();
 
@@ -250,12 +252,12 @@ public class LemmaFrequencyService {
     }
 
     /**
-     * Вычисляет абсолютный ранг страниц.
-     * <p>Суммирует веса всех индексов страницы.
-     *
-     * @param indexes список индексов
-     * @return карта страниц и их абсолютного ранга
-     */
+    * Calculates the absolute rank of pages.
+    * <p>Sums the weights of all page indexes.
+    *
+    * @param indexes list of indexes
+    * @return map of pages and their absolute ranks
+    */
     private Map<PageEntity, Float> calcAbsoluteRank(List<IndexEntity> indexes) {
         Map<PageEntity, Float> pageRanks = new HashMap<>();
         for (IndexEntity idx : indexes) {
@@ -266,14 +268,14 @@ public class LemmaFrequencyService {
     }
 
     /**
-     * Вычисляет относительный ранг страниц.
-     * <p>Скорректированный ранг учитывает частоту совпадения лемм в запросе и нормализуется по максимальному значению.
-     *
-     * @param absoluteRanks карта страниц и их абсолютного ранга
-     * @param indexes список индексов
-     * @param queryLemmas список лемм поискового запроса
-     * @return карта страниц и их относительного ранга, отсортированная по убыванию
-     */
+    * Calculates the relative rank of pages.
+    * <p>The adjusted rank considers the frequency of matching lemmas in the query and is normalized by the maximum value.
+    *
+    * @param absoluteRanks map of pages and their absolute ranks
+    * @param indexes list of indexes
+    * @param queryLemmas list of lemmas from the search query
+    * @return map of pages and their relative ranks, sorted in descending order
+    */
     private Map<PageEntity, Float> calcRelativeRank(Map<PageEntity, Float> absoluteRanks, List<IndexEntity> indexes, List<String> queryLemmas) {
         if (absoluteRanks.isEmpty()) return Map.of();
         Map<PageEntity, Integer> lemmaMatches = new HashMap<>();
