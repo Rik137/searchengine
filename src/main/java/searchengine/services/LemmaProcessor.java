@@ -9,20 +9,20 @@ import searchengine.services.util.LemmaFilter;
 import java.util.*;
 import java.util.stream.Stream;
 
-/**
- * Сервис для обработки текста и извлечения лемм.
+ /**
+ * Service for text processing and lemma extraction.
  *
- * <p>Основные функции класса:
+ * <p>Main functions of the class:
  * <ul>
- *     <li>Токенизация текста на отдельные слова</li>
- *     <li>Очистка и нормализация слов</li>
- *     <li>Получение нормальных форм слов через LuceneMorphology</li>
- *     <li>Подсчет частоты встречаемости лемм</li>
- *     <li>Формирование уникального списка лемм для поисковых запросов</li>
+ *     <li>Tokenizing text into individual words</li>
+ *     <li>Cleaning and normalizing words</li>
+ *     <li>Obtaining the base forms of words via LuceneMorphology</li>
+ *     <li>Counting lemma occurrence frequencies</li>
+ *     <li>Generating a unique list of lemmas for search queries</li>
  * </ul>
  *
- * <p>Используется для индексации страниц, подсчета частоты лемм и подготовки данных
- * для поиска по сайту.
+ * <p>Used for page indexing, lemma frequency counting, and preparing data
+ * for site search.
  *
  */
 
@@ -33,16 +33,18 @@ public class LemmaProcessor {
 
     private static final LogTag TAG = LogTag.LEMMA;
 
-    /** Компонент для работы с леммами: токенизация, нормализация, морфология. */
+    /** 
+    * Component for working with lemmas: tokenization, normalization, morphology
+    */
     private final LemmaFilter lemmaFilter;
 
 
     /**
-     * Генерирует список лемм из текста.
-     *
-     * @param text исходный текст
-     * @return список лемм (может содержать дубликаты)
-     */
+    * Generates a list of lemmas from text.
+    *
+    * @param text the source text
+    * @return list of lemmas (may contain duplicates)
+    */
     private List<String> generateLemmas(String text) {
         return lemmaFilter.tokenizeText(text).stream()
                 .map(lemmaFilter::normalizeRussianWord)
@@ -59,11 +61,11 @@ public class LemmaProcessor {
     }
 
     /**
-     * Считает количество вхождений каждой леммы.
-     *
-     * @param lemmas список лемм
-     * @return отображение "лемма -> количество"
-     */
+    * Counts the occurrences of each lemma.
+    *
+    * @param lemmas list of lemmas
+    * @return mapping of "lemma -> count"
+    */
     private Map<String, Integer> countLemmas(List<String> lemmas) {
         Map<String, Integer> countMap = new HashMap<>();
         for (String lemma : lemmas) {
@@ -73,22 +75,22 @@ public class LemmaProcessor {
     }
 
     /**
-     * Получает отображение всех лемм с их частотой для текста.
-     *
-     * @param text исходный текст
-     * @return карта лемма -> количество
-     */
+    * Retrieves a mapping of all lemmas with their frequencies for the given text.
+    *
+    * @param text the source text
+    * @return map of lemma -> count
+    */
     public Map<String, Integer> getLemmas(String text) {
         List<String> lemmas = generateLemmas(text);
         return countLemmas(lemmas);
     }
 
     /**
-     * Получает список уникальных лемм, пригодный для поиска.
-     *
-     * @param text исходный текст
-     * @return список уникальных лемм
-     */
+    * Retrieves a list of unique lemmas suitable for search.
+    *
+    * @param text the source text
+    * @return list of unique lemmas
+    */
     public List<String> getLemmasForSearch(String text) {
         return new ArrayList<>(new LinkedHashSet<>(generateLemmas(text)));
     }
