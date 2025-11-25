@@ -12,13 +12,12 @@ import searchengine.model.SiteEntity;
 import searchengine.services.serviceinterfaces.PageIndexingService;
 import searchengine.services.util.IndexingContext;
 import searchengine.services.util.Stopwatch;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-/*
- * Сервис индексации одной страницы
+ /*
+ * Service for indexing a single page
  */
 
 @Service
@@ -31,22 +30,24 @@ public class PageIndexingServiceImpl implements PageIndexingService {
 
     private static final LogTag TAG = LogTag.PAGE_INDEXING_SERVER;
 
-    /** Контекст индексации с доступом к менеджерам данных и лемм. */
+    /** 
+    * Indexing context providing access to data and lemma managers
+    */
     private final IndexingContext context;
 
 
     /**
-     * Индексирует страницу по указанному URL.
-     *
-     * <p>Метод выполняет следующие шаги:
-     * 1. Скачивает контент страницы.
-     * 2. Определяет, к какому сайту принадлежит URL.
-     * 3. Если страница уже существует в БД — удаляет старые леммы и страницу.
-     * 4. Сохраняет страницу и пересчитывает леммы.
-     *
-     * @param url URL страницы
-     * @return true, если страница успешно проиндексирована, false при ошибках
-     */
+    * Indexes a page by the specified URL.
+    *
+    * <p>The method performs the following steps:
+    * 1. Downloads the page content.
+    * 2. Determines which site the URL belongs to.
+    * 3. If the page already exists in the database, removes old lemmas and the page itself.
+    * 4. Saves the page and recalculates lemmas.
+    *
+    * @param url the page URL
+    * @return true if the page was successfully indexed, false if an error occurred
+    */
     public boolean indexPage(String url) {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.start();
@@ -54,14 +55,15 @@ public class PageIndexingServiceImpl implements PageIndexingService {
         PageResponse response = context.getManagerJSOUP().fetchPageWithContent(url);
 
         if (response.getBody() == null) {
-            log.warn("{}  Не удалось скачать контент для URL {}, код {}", TAG,  url, response.getStatusCode());
+            log.warn("{}  Failed to download content for URL {}, status code {}", 
+                     TAG,  url, response.getStatusCode());
             return false;
         }
 
         SiteEntity siteEntity = findSiteForUrl(url);
 
         if (siteEntity == null) {
-            log.warn("{}  Страница {} не принадлежит ни одному сайту из БД", TAG, url);
+            log.warn("{}  Page {} does not belong to any site in the database", TAG, url);
             return false;
         }
 
@@ -70,28 +72,28 @@ public class PageIndexingServiceImpl implements PageIndexingService {
                 .ifPresent(existingPage -> {
                     context.getLemmaFrequencyService().decreaseLemmaFrequencies(existingPage);
                     context.getDataManager().deletePage(existingPage);
-                    log.info("{}  Старая страница {} удалена перед обновлением", TAG, url);
+                    log.info("{}  Old page {} was removed before updating", TAG, url);
                 });
 
         savePageAndLemmas(siteEntity, url, response);
         stopwatch.stop();
-        log.info("{}  Страница {} успешно сохранена для сайта {}. Время индексации: {} сек.",
+        log.info("{}  Page {} successfully saved for site {}. Indexing time: {} sec.",
                 TAG, url, siteEntity.getUrl(), stopwatch.getSeconds());
         stopwatch.reset();
         return true;
     }
 
     /**
-     * Находит сайт в БД, которому принадлежит указанный URL.
-     *
-     * @param url URL страницы
-     * @return {@link SiteEntity} сайта или null, если сайт не найден
-     */
+    * Finds the site in the database to which the specified URL belongs.
+    *
+    * @param url the page URL
+    * @return {@link SiteEntity} of the site, or null if no matching site is found
+    */
     private SiteEntity findSiteForUrl(String url) {
         List<SiteEntity> sites = context.getDataManager().getAllSites();
 
         if (sites.isEmpty()) {
-            log.warn("{}  База сайтов пуста! Добавьте хотя бы один сайт.", TAG);
+            log.warn("{}  The site database is empty! Add at least one site.", TAG);
             return null;
         }
 
@@ -104,23 +106,22 @@ public class PageIndexingServiceImpl implements PageIndexingService {
                         return site;
                     }
                 } catch (MalformedURLException e) {
-                    log.error("{}  Неверный URL в базе сайтов: {}", TAG, site.getUrl());
+                    log.error("{} Invalid URL in the site database: {}", TAG, site.getUrl());
                 }
             }
         } catch (MalformedURLException e) {
-            log.error("{}  Неверный или недопустимый URL: {}", TAG, url);
+            log.error("{}  Invalid or unacceptable URL: {}", TAG, url);
         }
         return null;
     }
 
     /**
-     * Проверяет, совпадают ли хост и протокол входного URL и сайта.
-     *
-     * @param input входной URL
-     * @param site  URL сайта
-     * @return true, если хост и протокол совпадают
-     */
-
+    * Checks if the host and protocol of the input URL match those of the site.
+    *
+    * @param input input URL
+    * @param site  site URL
+    * @return true if host and protocol match
+    */
     private boolean matchesHostAndProtocol(URL input, URL site) {
         String inputHost = input.getHost().replaceFirst("^www\\.", "").toLowerCase();
         String siteHost = site.getHost().replaceFirst("^www\\.", "").toLowerCase();
@@ -128,12 +129,12 @@ public class PageIndexingServiceImpl implements PageIndexingService {
     }
 
     /**
-     * Сохраняет страницу и пересчитывает леммы.
-     *
-     * @param site     сайт, к которому принадлежит страница
-     * @param path     URL страницы
-     * @param response ответ с содержимым страницы
-     */
+    * Saves the page and recalculates lemmas.
+    *
+    * @param site     the site to which the page belongs
+    * @param path     the page URL
+    * @param response the response containing the page content
+    */
     private void savePageAndLemmas(SiteEntity site, String path, PageResponse response) {
         PageEntity page = context.getEntityFactory().createPageEntity(
                 site,
