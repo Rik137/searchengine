@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import searchengine.logs.LogTag;
 import searchengine.services.serviceinterfaces.IndexingService;
 import searchengine.services.util.Stopwatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Implementation of the site indexing service.

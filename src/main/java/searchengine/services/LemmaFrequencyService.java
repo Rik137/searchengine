@@ -52,7 +52,7 @@ public class LemmaFrequencyService {
         String content = page.getContent();
         SiteEntity site = page.getSiteEntity();
         if (content == null || content.isBlank()) {
-            log.warn("{}  Пустой контент для страницы id={}", TAG, page.getId());
+            log.warn("{} Empty content for page id={}", TAG, page.getId());
             return;
         }
 
@@ -68,12 +68,12 @@ public class LemmaFrequencyService {
 
                         if (lemmaEntity.getFrequency() == 0) {
                             dataManager.deleteLemma(lemmaEntity.getId());
-                            log.debug("{}  Удалена лемма '{}'", TAG, lemmaName);
+                            log.debug("{}  lemma deleted '{}'", TAG, lemmaName);
                         } else {
                             dataManager.saveLemma(lemmaEntity);
                         }
                     },
-                    () -> log.debug("{}  Лемма '{}' не найдена в БД", TAG, lemmaName)
+                    () -> log.debug("{}  lemma '{}' not found", TAG, lemmaName)
             );
         }
     }
@@ -87,7 +87,7 @@ public class LemmaFrequencyService {
     @Transactional
     public void savePageLemmasAndIndexes(PageEntity page, String content) {
         if (content == null || content.isBlank()) {
-            log.warn("{}  Пустой контент, сохранение лемм пропущено для страницы id={}", TAG, page.getId());
+            log.warn("{}  Empty content, lemma saving skipped for page id={}", TAG, page.getId());
             return;
         }
         Map<String, Integer> lemmas = lemmaProcessor.getLemmas(content);
@@ -104,7 +104,7 @@ public class LemmaFrequencyService {
             if (lemmaOpt.isEmpty()) {
                 lemmaEntity = entityFactory.createLemmaEntity(page.getSiteEntity(), lemmaName, frequencyToAdd);
                 dataManager.saveLemma(lemmaEntity);
-                log.debug("{}  Создана новая лемма '{}'", TAG, lemmaName);
+                log.debug("{} new lemma created '{}'", TAG, lemmaName);
             } else {
                 lemmaEntity = lemmaOpt.get();
                 lemmaEntity.setFrequency(lemmaEntity.getFrequency() + frequencyToAdd);
@@ -175,18 +175,17 @@ public class LemmaFrequencyService {
     * @return list of {@link SearchResult} with relevant pages
     */
     public List<SearchResult> searchResult(String query, String url, int offset, int limit) {
-        log.info("{}  Поиск запроса '{}' по сайту '{}'", TAG, query, url);
-
+        log.info("{}  Searching for query '{}' on site '{}'", TAG, query, url);
         List<String> lemmas = lemmaProcessor.getLemmasForSearch(query);
-        System.out.println("леммы для запроса " + lemmas);
+        System.out.println("Lemmas for query: " + lemmas);
         if (lemmas.isEmpty()) {
-            log.warn("{}  Не найдено лемм для запроса '{}'", TAG, query);
+            log.warn("{}  No lemmas found for query '{}'", TAG, query);
             return List.of();
         }
 
         List<LemmaEntity> lemmasEntity = getLemmaFromDataBase(lemmas, url);
         if (lemmasEntity.isEmpty()) {
-            log.warn("{}  Не найдено лемм в БД для запроса '{}'", TAG, query);
+            log.warn("{}  No lemmas found in the database for query '{}'", TAG, query);
             return List.of();
         }
 
@@ -202,13 +201,13 @@ public class LemmaFrequencyService {
                 .toList();
 
         if (filtered.isEmpty()) {
-            log.warn("{}  После фильтрации не осталось релевантных лемм", TAG);
+            log.warn("{}  No relevant lemmas remain after filtering", TAG);
             return List.of();
         }
 
         List<IndexEntity> indexes = findIndexesForAllLemmas(filtered, url);
         if (indexes.isEmpty()) {
-            log.info("{}  Поиск не дал результатов — пересечение пусто", TAG);
+            log.info("{}  Search returned no results — intersection is empty", TAG);
             return List.of();
         }
 
@@ -216,8 +215,7 @@ public class LemmaFrequencyService {
         Map<PageEntity, Float> relative = calcRelativeRank(absolute, indexes, lemmas);
         SearchBuilder builder = new SearchBuilder();
         List<SearchResult> results = builder.build(relative, offset, limit, query);
-
-        log.info("{}  По запросу '{}' найдено {} результатов", TAG, query, results.size());
+        log.info("{}  Found {} results for query '{}'", TAG, results.size(), query);
         return results;
     }
 
@@ -263,7 +261,7 @@ public class LemmaFrequencyService {
         for (IndexEntity idx : indexes) {
             pageRanks.merge(idx.getPageEntity(), idx.getRank(), Float::sum);
         }
-        log.info("{}  Вычислена абсолютная релевантность для {} страниц", TAG, pageRanks.size());
+        log.info("{}  Absolute relevance calculated for {} pages", TAG, pageRanks.size());
         return pageRanks;
     }
 
