@@ -20,46 +20,50 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @RequiredArgsConstructor
 
-/**
- * Менеджер задач индексации
- * <p>Отвечает за запуск и остановку многопоточной индексации всех сайтов,
- * используя {@link ForkJoinPool} и корневую задачу {@link SitesTask}.
- * Все необходимые компоненты для работы индексации хранятся в {@link IndexingContext}.
+ /**
+ * Indexing Task Manager
+ * <p>Responsible for starting and stopping multithreaded indexing of all sites,
+ * using {@link ForkJoinPool} and the root task {@link SitesTask}.
+ * All necessary components for indexing are stored in {@link IndexingContext}.
  */
 
 public class ManagerTasks {
 
     private static final LogTag TAG = LogTag.MANAGER_TASKS;
 
-    /** Пул потоков для выполнения задач индексации. */
+    /**
+    * Thread pool for executing indexing tasks
+    */
     private ForkJoinPool pool;
 
-    /** Контекст индексации с необходимыми сервисами и данными. */
+    /**
+    * Indexing context containing required services and data
+    */
     private final IndexingContext context;
 
 
     /**
-     * Запускает задачи индексации всех сайтов.
-     */
+    * Starts indexing tasks for all sites.
+    */
     public void startIndexTask(){
         context.clearStopRequest();
         pool = new ForkJoinPool();
         context.getVisitedUrlStore().resetAll();
 
-        log.info("{}  ИНДЕКСАЦИЯ УСПЕШНО ЗАПУЩЕНА...", TAG);
-      try {
+        log.info("{}  INDEXING SUCCESSFULLY STARTED...", TAG);
+        try {
 
           pool.invoke(new SitesTask(context));
       }finally {
-          log.info("{} ИНДЕКСАЦИЯ ЗАВЕРШИНА...", TAG);
-      }
+            log.info("{}  INDEXING COMPLETED...", TAG);
+        }
     }
 
     /**
-     * Останавливает текущую индексацию.
-     */
+    * Stops the current indexing process.
+    */
     public void stopIndexingTask() {
-        log.info("{}  Останавливаем индексацию: ставим флаг и шлём shutdownNow() пулу", TAG);
+        log.info("{}  Stopping indexing: setting flag and calling shutdownNow() on the pool", TAG);
         context.requestStop();
         pool.shutdown();
         try {
@@ -74,14 +78,14 @@ public class ManagerTasks {
     }
 
     /**
-     * Обновляет статус сайтов после принудительной остановки индексации.
-     * <p>Все активные сайты получают статус FAILED с указанием ошибки.
-     */
+    * Updates the status of sites after a forced stop of indexing.
+    * <p>All active sites are marked as FAILED with the error specified.
+    */
     private void updateSitesAfterStop() {
         Collection<SiteEntity> activeSites = context.getVisitedUrlStore().getActiveSites();
         for (SiteEntity site : activeSites) {
             site.setStatus(Status.FAILED);
-            site.setLastError("Пользователь остановил индексацию");
+            site.setLastError("User stopped the indexing");
             site.setStatusTime(LocalDateTime.now());
             context.getDataManager().saveSite(site);
         }

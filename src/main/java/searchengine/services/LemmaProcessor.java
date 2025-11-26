@@ -53,7 +53,7 @@ public class LemmaProcessor {
                     try {
                         return lemmaFilter.getLuceneMorphology().getNormalForms(word).stream();
                     } catch (WrongCharaterException e) {
-                        log.debug("{}  Пропущено некорректное слово для морфологии: {}", TAG, word);
+                        log.debug("{}  Skipped invalid word for morphology: {}", TAG, word);
                         return Stream.empty();
                     }
                 })
