@@ -12,15 +12,14 @@ import searchengine.model.SiteEntity;
 import searchengine.services.serviceinterfaces.StatisticsService;
 import searchengine.services.util.IndexingContext;
 import searchengine.services.util.Stopwatch;
-
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Сервис для формирования статистики по индексированию сайтов.
+ * Service for generating statistics on website indexing.
  *
- * <p>Возвращает как агрегированную информацию по всем сайтам, так и детальные данные по каждому.
+ * <p>Provides both aggregated information across all sites and detailed data for each site.
  */
 
 @Service
@@ -30,28 +29,28 @@ import java.util.List;
 public class StatisticsServiceImpl implements StatisticsService {
 
     private static final LogTag TAG = LogTag.STATISTICS;
-    private Stopwatch stopwatch = new Stopwatch();
+    private final Stopwatch stopwatch = new Stopwatch();
 
     /**
-     * Контекст индексации с доступом к менеджерам данных и состоянию задач.
-     */
+    * Indexing context with access to data managers and task status.
+    */
     private final IndexingContext context;
 
-    /** Сервис индексации для проверки текущего состояния процесса. */
+    /**
+    * Indexing service for checking the current state of the process
+    */
     private final IndexingServiceImpl indexingServiceImp;
 
     /**
-     * Получает текущую статистику по индексированию.
-     *
-     * @return {@link StatisticsResponse} с общей и детальной информацией по сайтам
-     */
+    * Retrieves the current indexing statistics.
+    *
+    * @return {@link StatisticsResponse} containing both overall and detailed information about the sites
+    */
     @Override
     public StatisticsResponse getStatistics() {
         List<SiteEntity> sites = context.getDataManager().getAllSites();
-        log.info("{}  Формирование статистики для {} сайтов", TAG, sites.size());
-
+        log.info("{}  Generating statistics for {} sites", TAG, sites.size());
         stopwatch.start();
-
         TotalStatistics total = calculateTotal(sites);
         List<DetailedStatisticsItem> detailed = buildDetailedStatistics(sites);
 
@@ -63,18 +62,16 @@ public class StatisticsServiceImpl implements StatisticsService {
         response.setStatistics(data);
         response.setResult(true);
         stopwatch.stop();
-        log.info("{}  Подсчет статистики завершился за {} сек.", TAG, stopwatch.getSeconds());
+        log.info("{}  Statistics calculation completed in {} sec.", TAG, stopwatch.getSeconds());
         stopwatch.reset();
-
         return response;
     }
-
     /**
-     * Подсчитывает агрегированную статистику по всем сайтам.
-     *
-     * @param sites список сайтов
-     * @return {@link TotalStatistics} с суммарным количеством страниц, лемм и состоянием индексации
-     */
+    * Calculates aggregated statistics across all sites.
+    *
+    * @param sites list of sites
+    * @return {@link TotalStatistics} containing the total number of pages, lemmas, and indexing status
+    */
     private TotalStatistics calculateTotal(List<SiteEntity> sites) {
         TotalStatistics total = new TotalStatistics();
         total.setSites(sites.size());
@@ -87,16 +84,15 @@ public class StatisticsServiceImpl implements StatisticsService {
             total.setPages(total.getPages() + pages);
             total.setLemmas(total.getLemmas() + lemmas);
         }
-
         return total;
     }
 
     /**
-     * Формирует детальную статистику для каждого сайта.
-     *
-     * @param sites список сайтов
-     * @return список {@link DetailedStatisticsItem} с информацией по каждому сайту
-     */
+    * Generates detailed statistics for each site.
+    *
+    * @param sites list of sites
+    * @return list of {@link DetailedStatisticsItem} containing information for each site
+    */
     private List<DetailedStatisticsItem> buildDetailedStatistics(List<SiteEntity> sites) {
         List<DetailedStatisticsItem> detailed = new ArrayList<>();
 
@@ -108,11 +104,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
-     * Преобразует объект SiteEntity в DetailedStatisticsItem.
-     *
-     * @param site сайт
-     * @return {@link DetailedStatisticsItem} с подробной информацией
-     */
+    * Converts a SiteEntity object into a DetailedStatisticsItem.
+    *
+    * @param site the site
+    * @return {@link DetailedStatisticsItem} with detailed information
+    */
     private DetailedStatisticsItem mapSiteToStatisticsItem(SiteEntity site) {
         DetailedStatisticsItem item = new DetailedStatisticsItem();
 
@@ -126,7 +122,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .toEpochMilli());
         item.setPages(site.getPageEntityList().size());
         item.setLemmas(context.getDataManager().getCountLemmasBySite(site));
-
         return item;
     }
 }
