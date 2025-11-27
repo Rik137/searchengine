@@ -11,8 +11,8 @@ import searchengine.services.util.IndexingContext;
 import searchengine.services.util.Stopwatch;
 import java.util.List;
 
-/*
- * Сервис поиска сайтов по запросу
+ /*
+ * Service for searching websites by query
  */
 
 @Service
@@ -23,62 +23,65 @@ public class SearchServiceImpl implements SearchService {
 
     private static final LogTag TAG = LogTag.SEARCH_SERVER;
 
-    /** Таймер для измерения времени поиска. */
-    private Stopwatch stopwatch = new Stopwatch();
+    /**
+    * Timer used to measure search execution time
+    */
+    private final Stopwatch stopwatch = new Stopwatch();
 
-    /** Контекст индексации с доступом к данным и сервису лемм. */
+    /**
+    * Indexing context providing access to data and the lemma service
+    */
     private final IndexingContext context;
 
     /**
-     * Проверяет, готов ли индекс для поиска.
-     *
-     * <p>Если указан конкретный сайт, проверяется его статус индексации.
-     * Если сайт не указан, проверяется, есть ли хотя бы один индексированный сайт.
-     *
-     * @param site URL сайта или null для проверки всех сайтов
-     * @return true, если индекс готов для поиска, иначе false
-     */
+    * Checks whether the index is ready for search.
+    *
+    * <p>If a specific site is provided, its indexing status is verified.
+    * If no site is specified, the method checks whether at least one site has been indexed.
+    *
+    * @param site the site URL, or null to check all sites
+    * @return true if the index is ready for search; false otherwise
+    */
     public boolean isIndexReady(String site){
         if (site != null) {
             if (!isSiteIndexed(site)) return false;
         } else {
             if (!hasAnySites()) return false;
         }
-        log.info("{}  сервис готов к поиску", TAG);
+        log.info("{}  service is ready for search", TAG);
         return  context.getDataManager().hasLemmas();
     }
 
     /**
-     * Выполняет поиск по запросу в индексе.
-     *
-     * @param query  поисковая строка
-     * @param url    URL сайта для ограничения поиска (может быть null)
-     * @param offset смещение для пагинации
-     * @param limit  количество результатов
-     * @return список результатов поиска {@link SearchResult}
-     * @throws IllegalStateException если индекс ещё не готов
-     */
+    * Performs a search in the index using the provided query.
+    *
+    * @param query  the search query
+    * @param url    the website URL to limit the search scope (may be null)
+    * @param offset the pagination offset
+    * @param limit  the number of results to return
+    * @return a list of search results {@link SearchResult}
+    * @throws IllegalStateException if the index is not yet ready
+    */
     @Override
     public List<SearchResult> search(String query, String url, int offset, int limit) throws IllegalStateException{
         if (!isIndexReady(url)) {
-            throw new IllegalStateException("Индекс ещё не готов. Попробуйте позже.");
+            throw new IllegalStateException("The index is not ready yet. Please try again later.");
         }
-          log.info("{}  Начат поиск по запросу '{}' для сайта '{}'", TAG, query, url);
-          stopwatch.start();
+        log.info("{}  Search started for query '{}' on site '{}'", TAG, query, url);
+        stopwatch.start();
           List<SearchResult> searchResul = context.getLemmaFrequencyService().searchResult(query, url, offset, limit);
           stopwatch.stop();
-          log.info("{}  Поиск завершился за {} сек.", TAG, stopwatch.getSeconds());
+          log.info("{}  Search completed in {} seconds.", TAG, stopwatch.getSeconds());
           stopwatch.reset();
           return searchResul;
     }
 
     /**
-     * Проверяет, проиндексирован ли конкретный сайт.
-     *
-     * @param url URL сайта
-     * @return true, если сайт проиндексирован, иначе false
-     */
-
+    * Checks whether a specific site has been indexed.
+    *
+    * @param url the site URL
+    * @return true if the site is indexed; false otherwise
+    */
     private boolean isSiteIndexed(String url) {
         return context.getDataManager()
                 .findSite(url)
@@ -87,10 +90,10 @@ public class SearchServiceImpl implements SearchService {
     }
 
     /**
-     * Проверяет, есть ли хотя бы один индексированный сайт.
-     *
-     * @return true, если есть сайты, иначе false
-     */
+    * Checks if there is at least one indexed site.
+    *
+    * @return true if there is at least one site, false otherwise
+    */
     private boolean hasAnySites(){
         return context.getDataManager().hasSites();
     }
