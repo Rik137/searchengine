@@ -38,7 +38,6 @@ public class LemmaProcessor {
     */
     private final LemmaFilter lemmaFilter;
 
-
     /**
     * Generates a list of lemmas from text.
     *

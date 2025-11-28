@@ -46,7 +46,6 @@ public class IndexingServiceImpl implements IndexingService {
     */
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
-
     /**
     * Checks whether indexing is currently running.
     *
@@ -56,14 +55,13 @@ public class IndexingServiceImpl implements IndexingService {
         return statusIndexing;
     }
 
-
    /*
    * Starts the indexing process for all sites.
    */
    @Override
    public void startIndexing() {
         if (isIndexing()) {
-            log.warn("{} Индексация уже запущена", TAG);
+            log.warn("{} Indexing is already running", TAG);
             return;
         }
         if (executor.isShutdown() || executor.isTerminated()) {
@@ -75,7 +73,7 @@ public class IndexingServiceImpl implements IndexingService {
                 stopwatch.start();
                 managerTasks.startIndexTask();
             } catch (Exception e) {
-                log.error("{} Ошибка при индексации", TAG, e);
+                log.error("{} Error during indexing", TAG, e);
             } finally {
                 stopwatch.stop();
                 stopwatch.reset();

@@ -86,5 +86,4 @@ public class SiteTask extends RecursiveAction {
         siteEntity.setStatusTime(LocalDateTime.now());
         context.getDataManager().saveSite(siteEntity);
     }
-
 }

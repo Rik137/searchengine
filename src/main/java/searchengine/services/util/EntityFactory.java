@@ -4,21 +4,22 @@ import org.springframework.stereotype.Component;
 import searchengine.model.*;
 import java.time.LocalDateTime;
 
-/**
- * Фабрика сущностей для создания объектов {@link SiteEntity}, {@link PageEntity}, {@link LemmaEntity} и {@link IndexEntity}.
- * <p>Используется для упрощенного создания и инициализации сущностей перед сохранением в базу данных.</p>
+ /**
+ * Entity factory for creating {@link SiteEntity}, {@link PageEntity}, {@link LemmaEntity} and {@link IndexEntity} objects.
+ *
+ * <p>Used to simplify the creation and initialization of entities before saving them to the database.</p>
  */
 
 @Component
 public class EntityFactory {
 
     /**
-     * Создает новый объект {@link SiteEntity} с начальным статусом {@link Status#INDEXING}.
-     *
-     * @param name имя сайта
-     * @param url  URL сайта
-     * @return объект {@link SiteEntity}
-     */
+    * Creates a new {@link SiteEntity} with the initial status {@link Status#INDEXING}.
+    *
+    * @param name the site name
+    * @param url  the site URL
+    * @return the {@link SiteEntity} object
+    */
     public SiteEntity createSiteEntity(String name, String url){
         SiteEntity site = new SiteEntity();
         site.setStatus(Status.INDEXING);
@@ -29,14 +30,14 @@ public class EntityFactory {
     }
 
     /**
-     * Создает новый объект {@link PageEntity}.
-     *
-     * @param siteEntity сайт, которому принадлежит страница
-     * @param path       путь страницы
-     * @param code       HTTP статус код
-     * @param content    HTML содержимое страницы
-     * @return объект {@link PageEntity}
-     */
+    * Creates a new {@link PageEntity}.
+    *
+    * @param siteEntity the site to which the page belongs
+    * @param path       the page path
+    * @param code       the HTTP status code
+    * @param content    the HTML content of the page
+    * @return the {@link PageEntity} object
+    */
     public PageEntity createPageEntity(SiteEntity siteEntity,
                                     String path, int code, String content){
         PageEntity page = new PageEntity();
@@ -47,15 +48,15 @@ public class EntityFactory {
         return page;
     }
 
-    /**
-     * Создает новый объект {@link LemmaEntity}.
+     /**
+     * Creates a new {@link LemmaEntity}.
      *
-     * @param siteEntity сайт, которому принадлежит лемма
-     * @param lemma      текст леммы
-     * @param count      частота встречаемости леммы
-     * @return объект {@link LemmaEntity}
+     * @param siteEntity the site to which the lemma belongs
+     * @param lemma      the lemma text
+     * @param count      the lemma frequency
+     * @return the {@link LemmaEntity} object
      */
-    public LemmaEntity createLemmaEntity(SiteEntity siteEntity, String lemma, int count){
+     public LemmaEntity createLemmaEntity(SiteEntity siteEntity, String lemma, int count){
         LemmaEntity lemmaEntity = new LemmaEntity();
         lemmaEntity.setSiteEntity(siteEntity);
         lemmaEntity.setLemma(lemma);
@@ -63,15 +64,15 @@ public class EntityFactory {
         return lemmaEntity;
     }
 
-    /**
-     * Создает новый объект {@link IndexEntity}.
+     /**
+     * Creates a new {@link IndexEntity}.
      *
-     * @param pageEntity  страница, к которой относится индекс
-     * @param lemmaEntity лемма, к которой относится индекс
-     * @param rank        вес леммы на странице
-     * @return объект {@link IndexEntity}
+     * @param pageEntity  the page to which the index belongs
+     * @param lemmaEntity the lemma associated with the index
+     * @param rank        the lemma weight on the page
+     * @return the {@link IndexEntity} object
      */
-    public IndexEntity createIndexEntity(PageEntity pageEntity, LemmaEntity lemmaEntity, float rank){
+     public IndexEntity createIndexEntity(PageEntity pageEntity, LemmaEntity lemmaEntity, float rank){
         IndexEntity indexEntity = new IndexEntity();
         indexEntity.setPageEntity(pageEntity);
         indexEntity.setLemmaEntity(lemmaEntity);
