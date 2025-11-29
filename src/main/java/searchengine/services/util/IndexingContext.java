@@ -12,20 +12,20 @@ import searchengine.services.LemmaFrequencyService;
 import searchengine.services.LemmaProcessor;
 import searchengine.services.DataManager;
 
-/**
- * Контекст для процессов индексирования страниц.
- * <p>Содержит все необходимые компоненты для обхода сайтов, обработки страниц и лемм.
- * Предоставляет функциональность для управления состоянием процесса (остановка/проверка остановки).
+ /**
+ * Context for page indexing processes.
+ * <p>Contains all the necessary components for crawling websites, processing pages, and handling lemmas.
+ * Provides functionality for managing the process state (stop/check-stop).
  *
- * <p>Используемые компоненты:
+ * <p>Components used:
  * <ul>
- *   <li>{@link SitesList} — список сайтов для индексирования</li>
- *   <li>{@link EntityFactory} — создание сущностей для БД</li>
- *   <li>{@link DataManager} — работа с БД</li>
- *   <li>{@link ManagerJSOUP} — извлечение ссылок и текста со страниц</li>
- *   <li>{@link LemmaProcessor} — обработка текста и генерация лемм</li>
- *   <li>{@link VisitedUrlStore} — хранение посещённых URL</li>
- *   <li>{@link LemmaFrequencyService} — работа с частотой лемм и индексами</li>
+ *   <li>{@link SitesList} — list of sites to index</li>
+ *   <li>{@link EntityFactory} — entity creation for the database</li>
+ *   <li>{@link DataManager} — database operations</li>
+ *   <li>{@link ManagerJSOUP} — extraction of links and text from pages</li>
+ *   <li>{@link LemmaProcessor} — text processing and lemma generation</li>
+ *   <li>{@link VisitedUrlStore} — storage of visited URLs</li>
+ *   <li>{@link LemmaFrequencyService} — handling lemma frequencies and indexes</li>
  * </ul>
  */
 
@@ -39,33 +39,49 @@ public class IndexingContext {
 
     private static final LogTag TAG = LogTag.INDEXING_CONTEXT;
 
-    /** Список сайтов для обхода */
+    /**
+    * List of sites to crawl
+    */
     private final SitesList sites;
 
-    /** Фабрика сущностей для сохранения в БД */
+    /**
+    * Entity factory for saving data to the database
+    */
     private final EntityFactory entityFactory;
 
-    /** Менеджер работы с базой данных */
+    /**
+    * Database manager
+    */
     private final DataManager dataManager;
 
-    /** Компонент для получения страниц и извлечения текста */
+    /**
+    * Component for fetching pages and extracting text
+    */
     private final ManagerJSOUP managerJSOUP;
 
-    /** Процессор лемм для текстов страниц */
+    /**
+    * Lemma processor for page text
+    */
     private final LemmaProcessor lemmaProcessor;
 
-    /** Хранилище посещённых URL */
+     /**
+     * Store for visited URLs
+     */
     private final VisitedUrlStore visitedUrlStore;
 
-    /** Сервис работы с леммами и индексами (отложенная инициализация) */
+     /**
+     * Service for handling lemmas and indexes (lazy initialization)
+     */
     private final @Lazy LemmaFrequencyService lemmaFrequencyService;
 
-    /** Флаг запроса остановки процесса индексирования */
+     /**
+     * Flag indicating a request to stop the indexing process
+     */
     private volatile boolean stopRequested = false;
 
-    /**
-     * Запрашивает остановку текущего процесса индексирования.
-     * <p>Устанавливает {@link #stopRequested} в true.
+     /**
+     * Requests stopping the current indexing process.
+     * <p>Sets {@link #stopRequested} to true.
      */
     public void requestStop() {
         this.stopRequested = true;
@@ -73,30 +89,30 @@ public class IndexingContext {
 
 
     /**
-     * Сбрасывает запрос на остановку.
-     * <p>Используется для возобновления процесса после остановки.
+     * Resets the stop request.
+     * <p>Used to resume the process after it has been stopped.
      */
-    public void clearStopRequest() {
+     public void clearStopRequest() {
         this.stopRequested = false;
     }
 
 
-    /**
-     * Проверяет, должен ли процесс остановиться.
-     * <p>Возвращает true, если:
+     /**
+     * Checks if the process should stop.
+     * <p>Returns true if:
      * <ul>
-     *   <li>Был установлен {@link #stopRequested}</li>
-     *   <li>Текущий поток был прерван</li>
+     *   <li>{@link #stopRequested} has been set</li>
+     *   <li>The current thread has been interrupted</li>
      * </ul>
-     * <p>Если остановка требуется, логирует информацию о прерывании задачи.
+     * <p>If stopping is required, logs information about the task interruption.
      *
-     * @param taskName имя текущей задачи (для логирования)
-     * @return true, если выполнение должно быть прервано, иначе false
+     * @param taskName the name of the current task (for logging)
+     * @return true if execution should be halted, false otherwise
      */
-    public boolean shouldStop(String taskName) {
+     public boolean shouldStop(String taskName) {
         boolean stop = stopRequested || Thread.currentThread().isInterrupted();
         if (stop) {
-            log.info("{}  Остановка задачи {}: выполнение прервано", TAG, taskName);
+            log.info("{}  Stopping task {}: execution interrupted", TAG, taskName);
         }
         return stop;
     }
