@@ -10,18 +10,18 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Компонент для предварительной обработки текста и фильтрации слов.
+ * Component for preprocessing text and filtering words.
  *
- * <p>Основные функции класса:
+ * <p>Main responsibilities of the class:
  * <ul>
- *     <li>Удаление HTML-тегов из текста через {@link ManagerJSOUP}</li>
- *     <li>Токенизация текста на отдельные слова</li>
- *     <li>Нормализация слов: приведение к нижнему регистру и удаление лишних символов</li>
- *     <li>Фильтрация служебных частей речи (союзы, междометия, частицы и т.д.) с использованием LuceneMorphology</li>
- *     <li>Проверка, что слово является корректным русским словом</li>
+ *     <li>Removing HTML tags from text via {@link ManagerJSOUP}</li>
+ *     <li>Tokenizing text into individual words</li>
+ *     <li>Normalizing words: converting to lowercase and removing extraneous characters</li>
+ *     <li>Filtering out functional parts of speech (conjunctions, interjections, particles, etc.) using LuceneMorphology</li>
+ *     <li>Validating that a word is a proper Russian word</li>
  * </ul>
  *
- * <p>Используется для подготовки текста перед извлечением лемм и индексацией.
+ * <p>Used for preparing text before lemma extraction and indexing.
  */
 
 @Component
@@ -41,16 +41,16 @@ public class LemmaFilter {
         try {
             luceneMorphology = new RussianLuceneMorphology();
         } catch (IOException e) {
-            throw new RuntimeException("Ошибка инициализации LuceneMorphology", e);
+            throw new RuntimeException("LuceneMorphology initialization error", e);
         }
     }
 
     /**
-     * Разбивает текст на отдельные слова и фильтрует служебные части речи.
-     *
-     * @param text исходный HTML или текст
-     * @return список слов, пригодных для дальнейшей обработки
-     */
+    * Splits the text into individual words and filters out functional parts of speech.
+    *
+    * @param text the original HTML or plain text
+    * @return a list of words suitable for further processing
+    */
     public List<String> tokenizeText(String text) {
         List<String> words = prepareText(text);
 
@@ -60,11 +60,11 @@ public class LemmaFilter {
     }
 
     /**
-     * Проверяет, является ли слово служебным (союз, междометие, частица и т.д.).
-     *
-     * @param word слово для проверки
-     * @return true, если слово НЕ является служебным
-     */
+    * Checks whether a word is a functional word (conjunction, interjection, particle, etc.).
+    *
+    * @param word the word to check
+    * @return true if the word is NOT a functional word
+    */
     private boolean isNotServiceWord(String word) {
         word = normalizeRussianWord(word);
         if(isValidRussianWord(word)) {
@@ -77,22 +77,21 @@ public class LemmaFilter {
     }
 
     /**
-     * Удаляет HTML-теги из текста через {@link ManagerJSOUP}.
-     *
-     * @param text исходный HTML
-     * @return текст без HTML-тегов
-     */
+    * Removes HTML tags from the text using {@link ManagerJSOUP}.
+    *
+    * @param text the original HTML
+    * @return the text without HTML tags
+    */
     private String filterTagHtml(String text) {
         return managerJSOUP.stripHtmlTags(text);
     }
-
     /**
-     * Подготавливает текст для токенизации: убирает лишние символы, переводит в нижний регистр,
-     * фильтрует латиницу и пустые слова.
-     *
-     * @param html исходный HTML или текст
-     * @return список "чистых" слов
-     */
+    * Prepares text for tokenization: removes extraneous characters, converts it to lowercase,
+    * filters out Latin characters and empty tokens.
+    *
+    * @param html the original HTML or text
+    * @return a list of "clean" words
+    */
     private List<String> prepareText(String html) {
         String text = filterTagHtml(html);
 
@@ -106,22 +105,22 @@ public class LemmaFilter {
     }
 
     /**
-     * Нормализует русское слово: приведение к нижнему регистру и удаление лишних символов.
-     *
-     * @param word слово для нормализации
-     * @return нормализованная форма слова
-     */
+    * Normalizes a Russian word by converting it to lowercase and removing extraneous characters.
+    *
+    * @param word the word to normalize
+    * @return the normalized form of the word
+    */
     public String normalizeRussianWord(String word) {
         return word.toLowerCase()
                 .replaceAll("[^а-яё]", "");
     }
 
     /**
-     * Проверяет, является ли слово корректным русским словом.
-     *
-     * @param word слово для проверки
-     * @return true, если слово состоит только из букв а-я или ё
-     */
+    * Checks whether a word is a valid Russian word.
+    *
+    * @param word the word to check
+    * @return true if the word contains only letters а–я or ё
+    */
     public boolean isValidRussianWord(String word) {
         return word.matches("[а-яё]+");
     }
