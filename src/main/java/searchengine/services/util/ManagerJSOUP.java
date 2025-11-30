@@ -7,39 +7,38 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.stereotype.Component;
 import searchengine.dto.PageResponse;
 import searchengine.logs.LogTag;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Компонент для работы с HTML-страницами с использованием Jsoup.
- * <p>Основные функции:
+ /**
+ * Component for working with HTML pages using Jsoup.
+ *
+ * <p>Main responsibilities:
  * <ul>
- *   <li>Получение всех ссылок с указанной страницы, фильтрация по домену.</li>
- *   <li>Загрузка страницы с возвратом кода ответа, HTML-контента и флага "это HTML?".</li>
- *   <li>Очистка HTML от тегов и извлечение текста.</li>
+ *   <li>Retrieving all links from a given page with domain-based filtering.</li>
+ *   <li>Fetching a page and returning its response code, HTML content, and a flag indicating whether it is HTML.</li>
+ *   <li>Cleaning HTML by removing tags and extracting text.</li>
  * </ul>
- * <p>Используется {@link RickBotClient} для получения страницы по URL.
+ *
+ * <p>Uses {@link RickBotClient} to fetch pages by URL.
  */
-
-@Component
 @Slf4j
 @RequiredArgsConstructor
 public class ManagerJSOUP {
 
-    private static LogTag TAG = LogTag.JSOUP_MANAGER;
+    private static final LogTag TAG = LogTag.JSOUP_MANAGER;
     private final RickBotClient rickBotClient;
 
-    /**
-     * Извлекает ссылки со страницы, оставляя только те, что принадлежат указанному домену.
+     /**
+     * Extracts links from a page, keeping only those that belong to the specified domain.
      *
-     * @param url URL страницы для сканирования
-     * @param siteDomain домен сайта, ссылки вне которого будут игнорироваться
-     * @return список ссылок, начинающихся с указанного домена; пустой список при ошибках или отсутствии ссылок
+     * @param url the URL of the page to scan
+     * @param siteDomain the site domain; links outside this domain will be ignored
+     * @return a list of links starting with the specified domain; an empty list if no links are found or an error occurs
      */
-    public List<String> getLinksFromPage(String url, String siteDomain) {
+     public List<String> getLinksFromPage(String url, String siteDomain) {
         List<String> links = new ArrayList<>();
         Document doc = null;
 
@@ -51,7 +50,7 @@ public class ManagerJSOUP {
         try {
             doc = rickBotClient.fetchPage(url);
         } catch (IOException | InterruptedException e) {
-            log.warn("{}  Не удалось получить страницу {}: {}", TAG, url, e.getMessage());
+            log.warn("{}  Failed to fetch page {}: {}", TAG, url, e.getMessage());
         }
 
         if (doc == null) return Collections.emptyList();
@@ -66,18 +65,18 @@ public class ManagerJSOUP {
         return links;
     }
 
-    /**
-     * Загружает страницу и возвращает {@link PageResponse}, содержащий:
+     /**
+     * Loads a page and returns a {@link PageResponse} containing:
      * <ul>
-     *   <li>HTTP статус код</li>
-     *   <li>HTML тело страницы, если оно есть</li>
-     *   <li>Флаг isHtml — является ли контент HTML</li>
+     *   <li>HTTP status code</li>
+     *   <li>HTML body of the page, if available</li>
+     *   <li>isHtml flag — whether the content is HTML</li>
      * </ul>
      *
-     * @param url URL страницы
-     * @return {@link PageResponse} с данными страницы; при ошибках status=-1, body=null, isHtml=false
+     * @param url URL of the page
+     * @return {@link PageResponse} with the page data; on errors, status=-1, body=null, isHtml=false
      */
-    public PageResponse fetchPageWithContent(String url) {
+     public PageResponse fetchPageWithContent(String url) {
         try {
             Connection.Response response = Jsoup.connect(url)
                     .ignoreHttpErrors(true)
@@ -96,33 +95,33 @@ public class ManagerJSOUP {
             return new PageResponse(status, body, isHtml);
 
         } catch (IOException e) {
-            log.warn("{}  Ошибка загрузки {}: {}", TAG, url, e.getMessage());
+            log.warn("{}  Error loading {}: {}", TAG, url, e.getMessage());
             return new PageResponse(-1, null, false);
         }
     }
 
-    /**
-     * Удаляет все HTML-теги из строки и возвращает чистый текст.
+     /**
+     * Removes all HTML tags from a string and returns plain text.
      *
-     * @param html HTML-контент
-     * @return текст без тегов; пустая строка, если вход null
+     * @param html HTML content
+     * @return text without tags; empty string if input is null
      */
-    public String stripHtmlTags(String html) {
+     public String stripHtmlTags(String html) {
         return html == null ? "" : Jsoup.parse(html).text();
     }
 
     /**
-     * Извлекает текст из {@link PageResponse}.
-     * <p>Возвращает null, если:
-     * <ul>
-     *   <li>response=null</li>
-     *   <li>HTTP статус не 200</li>
-     *   <li>тело ответа отсутствует</li>
-     * </ul>
-     *
-     * @param response объект {@link PageResponse}
-     * @return текст страницы или null при ошибках
-     */
+    * Extracts text from {@link PageResponse}.
+    * <p>Returns null if:
+    * <ul>
+    *   <li>response is null</li>
+    *   <li>HTTP status is not 200</li>
+    *   <li>response body is missing</li>
+    * </ul>
+    *
+    * @param response {@link PageResponse} object
+    * @return page text or null in case of errors
+    */
     public String extractText(PageResponse response) {
         if (response == null || response.getStatusCode() != 200 || response.getBody() == null) {
             return null;
@@ -130,7 +129,7 @@ public class ManagerJSOUP {
         try {
             return Jsoup.parse(response.getBody()).text();
         } catch (Exception e) {
-            log.warn("{}  Не удалось извлечь текст из ответа (статус {}): {}", TAG,
+            log.warn("{}  Failed to extract text from response (status {}): {}", TAG,
                     response.getStatusCode(), e.getMessage());
             return null;
         }
