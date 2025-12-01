@@ -10,18 +10,17 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 import searchengine.config.RickBotConfig;
 import searchengine.logs.LogTag;
-
 import java.io.IOException;
 import java.util.Random;
 
-/**
- * Класс для взаимодействия с веб-страницами через HTTP с эмуляцией реального браузера.
- * <p>
- * Основные функции:
+ /**
+ * A class for interacting with web pages over HTTP while emulating a real browser.
+ *
+ * <p>Main features:
  * <ul>
- *     <li>Выбор случайного User-Agent из конфигурации</li>
- *     <li>Добавление случайной задержки между запросами для снижения вероятности блокировок</li>
- *     <li>Получение страницы через Jsoup с обработкой ошибок HTTP и MIME</li>
+ *     <li>Selects a random User-Agent from the configuration</li>
+ *     <li>Adds a random delay between requests to reduce the risk of blocking</li>
+ *     <li>Fetches pages via Jsoup with proper handling of HTTP and MIME errors</li>
  * </ul>
  */
 
@@ -32,22 +31,26 @@ public class RickBotClient {
 
     private static final LogTag TAG = LogTag.RICK_BOT_CLIENT;
 
-    /** Конфигурация клиента RickBot (список User-Agent, задержки, реферер) */
+    /**
+    * RickBot client configuration (User-Agent list, delays, referrer)
+    */
     private final RickBotConfig config;
 
-    /** Генератор случайных чисел для выбора User-Agent и задержки */
+    /**
+    * Random generator used for selecting User-Agent strings and request delays
+    */
     private final Random random = new Random();
 
     /**
-     * Получает веб-страницу по URL с рандомным User-Agent и случайной задержкой.
-     * <p>
-     * Метод эмулирует поведение реального пользователя, снижая риск блокировки.
-     *
-     * @param url URL страницы
-     * @return объект {@link Document} с содержимым страницы или null, если страница недоступна или MIME не поддерживается
-     * @throws IOException если произошла ошибка соединения
-     * @throws InterruptedException если поток был прерван во время задержки
-     */
+    * Retrieves a web page by URL using a random User-Agent and a randomized delay.
+    * <p>
+    * This method emulates real user behavior to reduce the risk of being blocked.
+    *
+    * @param url the page URL
+    * @return a {@link Document} containing the page content, or null if the page is unavailable or the MIME type is unsupported
+    * @throws IOException if a connection error occurs
+    * @throws InterruptedException if the thread is interrupted during the delay
+    */
     public Document fetchPage(String url) throws IOException, InterruptedException {
         String ua = config.getUserAgents()
                 .get(random.nextInt(config.getUserAgents().size()));
@@ -61,12 +64,12 @@ public class RickBotClient {
         try {
             return connection.get();
         } catch (HttpStatusException e) {
-            log.warn("{}  HTTP ошибка {} для {}", TAG, e.getStatusCode(), url);
+            log.warn("{}  HTTP error {} for {}", TAG, e.getStatusCode(), url);
             return null;
         } catch (UnsupportedMimeTypeException e) {
             return null;
         } catch (IOException e) {
-            log.error("{}  Ошибка соединения с {}: {}", TAG, url, e.getMessage());
+            log.error("{}  Connection error with {}: {}", TAG, url, e.getMessage());
             throw e;
         }
     }
