@@ -9,15 +9,15 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Класс для построения результатов поиска.
- * <p>Создает объекты {@link SearchResult} из страниц, учитывая релевантность,
- * выделяет ключевые слова запроса в сниппете и генерирует текстовые превью.
- * <p>Основные функции:
+ /**
+ * A class responsible for building search results.
+ * <p>Creates {@link SearchResult} objects from pages, taking relevance into account,
+ * highlights query keywords in snippets, and generates text previews.
+ * <p>Main responsibilities:
  * <ul>
- *   <li>Формирование списка результатов поиска с пагинацией.</li>
- *   <li>Создание сниппетов с подсветкой слов запроса.</li>
- *   <li>Извлечение заголовков и относительных путей страниц.</li>
+ *   <li>Building a paginated list of search results.</li>
+ *   <li>Creating snippets with highlighted query terms.</li>
+ *   <li>Extracting page titles and relative paths.</li>
  * </ul>
  */
 
@@ -27,20 +27,37 @@ import java.util.regex.Pattern;
 public class SearchBuilder {
 
     private static final LogTag TAG = LogTag.SEARCH_BUILDER;
-    private static final int SNIPPET_RADIUS = 100;
-    private static final int SNIPPET_MAX_LENGTH = 250;
-    private static final int AVG_LINE_LENGTH = 80;
-    private static final int SNIPPET_LINES = 3;
+
+     /**
+     * The number of characters taken on each side of a matched query term
+     * when generating a snippet.
+     */
+     private static final int SNIPPET_RADIUS = 100;
+
+     /**
+     * The maximum allowed length of the generated snippet.
+     */
+     private static final int SNIPPET_MAX_LENGTH = 250;
+
+     /**
+     * The average line length used as a heuristic when formatting snippet output.
+     */
+     private static final int AVG_LINE_LENGTH = 80;
+
+     /**
+     * The number of lines to include in the final formatted snippet.
+     */
+     private static final int SNIPPET_LINES = 3;
 
     /**
-     * Формирует список {@link SearchResult} на основе карты страниц с релевантностью.
-     *
-     * @param rankedPages карта страниц и их ранга (релевантности)
-     * @param offset смещение для пагинации
-     * @param limit максимальное количество результатов
-     * @param query поисковый запрос, используется для подсветки слов в сниппете
-     * @return список {@link SearchResult} с заполненными сниппетами и заголовками
-     */
+    * Builds a list of {@link SearchResult} objects based on a map of pages with their relevance.
+    *
+    * @param rankedPages a map of pages and their relevance scores
+    * @param offset the pagination offset
+    * @param limit the maximum number of results
+    * @param query the search query used for highlighting terms in the snippet
+    * @return a list of {@link SearchResult} with populated snippets and titles
+    */
     public List<SearchResult> build(Map<PageEntity, Float> rankedPages, int offset, int limit, String query) {
         if (rankedPages.isEmpty()) return List.of();
 
@@ -54,25 +71,24 @@ public class SearchBuilder {
                 .map(entry -> createSearchResult(entry.getKey(), entry.getValue(), queryWords))
                 .toList();
     }
-
     /**
-     * Очищает HTML-теги из текста и убирает лишние пробелы.
-     *
-     * @param content HTML-контент страницы
-     * @return чистый текст без тегов
-     */
+    * Removes HTML tags from the given text and normalizes excess whitespace.
+    *
+    * @param content the page's HTML content
+    * @return plain text with tags removed and excess whitespace collapsed/trimmed
+    */
     private String cleanHtmlTags(String content) {
         return content.replaceAll("<[^>]*>", " ").replaceAll("\\s+", " ").trim();
     }
 
     /**
-     * Строит сниппет текста для отображения в результатах поиска.
-     * <p>Выделяет ключевые слова запроса жирным (<b>), ограничивает длину сниппета.
-     *
-     * @param text текст страницы без HTML
-     * @param queryWords список слов из поискового запроса
-     * @return сниппет для отображения
-     */
+    * Builds a text snippet for display in search results.
+    * <p>Highlights query keywords in bold (<b>) and limits the snippet length.
+    *
+    * @param text the page text without HTML
+    * @param queryWords the list of words from the search query
+    * @return the generated snippet for display
+    */
     private String buildSnippet(String text, List<String> queryWords) {
         if (text.isBlank()) return "";
 
@@ -89,15 +105,15 @@ public class SearchBuilder {
         return snippet;
     }
 
-    /**
-     * Находит фрагмент текста вокруг первого совпадения слов запроса.
-     * <p>Используется внутри {@link #buildSnippet(String, List)}.
+     /**
+     * Finds a text fragment around the first occurrence of any query word.
+     * <p>Used internally by {@link #buildSnippet(String, List)}.
      *
-     * @param text текст страницы
-     * @param queryWords слова запроса
-     * @return часть текста с совпадением слова или начало текста
+     * @param text the page text
+     * @param queryWords the query words
+     * @return a segment of text containing the match, or the beginning of the text if no match is found
      */
-    private static String getString(String text, List<String> queryWords) {
+     private static String getString(String text, List<String> queryWords) {
         String lowerText = text.toLowerCase();
         int matchIndex = -1;
 
@@ -115,16 +131,16 @@ public class SearchBuilder {
         return text.substring(start, end);
     }
 
-    /**
-     * Создает объект {@link SearchResult} для одной страницы.
-     * <p>Извлекает заголовок, относительный путь, сниппет и другие данные.
+     /**
+     * Creates a {@link SearchResult} object for a single page.
+     * <p>Extracts the title, relative path, snippet, and other related data.
      *
-     * @param page страница
-     * @param relevance рейтинг страницы
-     * @param queryWords список слов запроса
-     * @return {@link SearchResult} для данной страницы
+     * @param page the page
+     * @param relevance the page's relevance score
+     * @param queryWords the list of query words
+     * @return a {@link SearchResult} representing this page
      */
-    private SearchResult createSearchResult(PageEntity page, float relevance, List<String> queryWords) {
+     private SearchResult createSearchResult(PageEntity page, float relevance, List<String> queryWords) {
         String siteUrl = Optional.ofNullable(page.getSiteEntity())
                 .map(s -> s.getUrl())
                 .orElse("");
@@ -141,31 +157,31 @@ public class SearchBuilder {
         return new SearchResult(siteUrl, siteName, uri, title, snippet, relevance);
     }
 
-    /**
-     * Извлекает заголовок страницы из HTML-контента.
+     /**
+     * Extracts the page title from its HTML content.
      *
-     * @param html HTML-контент страницы
-     * @return заголовок страницы или "(без заголовка)" если не найден
+     * @param html the page's HTML content
+     * @return the page title, or "(no title)" if not found
      */
-    private String extractTitleFromHtml(String html) {
-        if (html == null || html.isBlank()) return "(без заголовка)";
+     private String extractTitleFromHtml(String html) {
+         if (html == null || html.isBlank()) return "(no title)";
         Pattern pattern = Pattern.compile("<title>(.*?)</title>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher matcher = pattern.matcher(html);
         if (matcher.find()) {
             String title = matcher.group(1).replaceAll("\\s+", " ").trim();
             return title.isEmpty() ? "(без заголовка)" : title;
         }
-        return "(без заголовка)";
+        return "(no title)";
     }
 
-    /**
-     * Вычисляет относительный путь страницы относительно URL сайта.
+     /**
+     * Computes the relative path of a page with respect to the site's URL.
      *
-     * @param fullUrl полный URL страницы
-     * @param siteUrl базовый URL сайта
-     * @return относительный путь (например, "/index.html") или "/" при ошибках
+     * @param fullUrl the full URL of the page
+     * @param siteUrl the base URL of the site
+     * @return the relative path (e.g., "/index.html") or "/" in case of errors
      */
-    private String extractRelativePath(String fullUrl, String siteUrl) {
+     private String extractRelativePath(String fullUrl, String siteUrl) {
         try {
             if (fullUrl.startsWith(siteUrl)) {
                 String relative = fullUrl.substring(siteUrl.length());
@@ -173,7 +189,7 @@ public class SearchBuilder {
             }
             return "/";
         } catch (Exception e) {
-            log.warn("{}  Не удалось извлечь относительный путь из {}", TAG, fullUrl, e);
+            log.warn("{}  Failed to extract relative path from {}", TAG, fullUrl, e);
             return "/";
         }
     }
