@@ -2,57 +2,58 @@ package searchengine.services.util;
 
 import lombok.Getter;
 
-/**
- * Класс {@code Stopwatch} представляет собой лёгкий инструмент
- * для точного измерения времени выполнения операций.
+ /**
+ * The {@code Stopwatch} class is a lightweight tool
+ * for precise measurement of operation execution time.
  */
 
 @Getter
 public class Stopwatch {
-    /**
-     * Время старта в наносекундах.
+
+     /**
+     * The start time in nanoseconds.
      */
-    private long startTime;
+     private long startTime;
+
+     /**
+     * Measured time in nanoseconds.
+     */
+     private long elapsedNanos;
 
     /**
-     * Измеренное время в наносекундах.
-     */
-    private long elapsedNanos;
-
-    /**
-     * Запускает измерение времени.
-     */
+    * Starts the time measurement.
+    */
     public void start() {
         startTime = System.nanoTime();
     }
 
-    /**
-     * Останавливает измерение и возвращает прошедшее время в секундах.
+     /**
+     * Stops the measurement and returns the elapsed time in seconds.
      *
-     * @return прошедшее время в секундах
+     * @return the elapsed time in seconds
      */
-    public double stop() {
+     public double stop() {
         elapsedNanos = System.nanoTime() - startTime;
         return getSeconds();
     }
 
-    /**
-     * Возвращает измеренное время в секундах.
+     /**
+     * Returns the measured time in seconds.
      */
-    public double getSeconds() {
+     public double getSeconds() {
         return elapsedNanos / 1_000_000_000.0;
     }
 
     /**
-     * Возвращает измеренное время в миллисекундах.
-     */
+    * Returns the measured time in milliseconds.
+    */
     public double getMillis() {
         return elapsedNanos / 1_000_000.0;
     }
 
     /**
-     * Сбрасывает измеренные данные, позволяя использовать таймер повторно.
-     */
+    * Resets the measured data, allowing the timer to be reused.
+    */
     public void reset() {
         startTime = 0L;
         elapsedNanos = 0L;
