@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Хранилище посещённых URL и активных сайтов во время индексации.
+ /**
+ * Storage for visited URLs and active sites during indexing.
  * <p>
- * Использует потокобезопасные коллекции для работы в многопоточном окружении.
+ * Uses thread-safe collections to operate correctly in a multithreaded environment.
  */
 
 @Component
@@ -21,71 +21,70 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class VisitedUrlStore {
 
-    /**
-     * Набор посещённых URL. Используется потокобезопасная реализация Set.
-     * Ключи добавляются при посещении страниц.
+     /**
+     * A set of visited URLs. Uses a thread-safe Set implementation.
+     * Keys are added when pages are visited.
      */
-    private final Set<String> visited = ConcurrentHashMap.newKeySet();
+     private final Set<String> visited = ConcurrentHashMap.newKeySet();
 
-    /**
-     * Словарь активных сайтов, ключ — URL сайта, значение — объект SiteEntity.
-     * Позволяет отслеживать текущие сайты, которые находятся в процессе индексации.
+     /**
+     * A map of active sites: the key is the site's URL, the value is a SiteEntity.
+     * Used to track sites that are currently being indexed.
      */
-    private final Map<String, SiteEntity> activeSites = new ConcurrentHashMap<>();
+     private final Map<String, SiteEntity> activeSites = new ConcurrentHashMap<>();
 
 
-    /**
-     * Помечает URL как посещённый.
+     /**
+     * Marks the given URL as visited.
      *
-     * @param url URL страницы
-     * @return true, если URL был добавлен впервые; false, если URL уже был в наборе
+     * @param url the page URL
+     * @return true if the URL was added for the first time; false if it was already present
      */
-    public boolean visitUrl(String url) {
+     public boolean visitUrl(String url) {
         return visited.add(url);
     }
 
-
-    /**
-     * Возвращает количество посещённых URL.
+     /**
+     * Returns the number of visited URLs.
      *
-     * @return количество уникальных посещённых URL
+     * @return the count of unique visited URLs
      */
-    public int size() {
+     public int size() {
         return visited.size();
     }
 
 
     /**
-     * Помечает сайт как активный.
-     *
-     * @param site объект SiteEntity сайта
-     */
+    * Marks a site as active.
+    *
+    * @param site the SiteEntity representing the site
+    */
     public void activateSite(SiteEntity site) {
         activeSites.put(site.getUrl(), site);
     }
 
     /**
-     * Убирает сайт из списка активных по URL.
-     *
-     * @param url URL сайта, который завершил индексацию
-     */
+    * Removes a site from the list of active sites by its URL.
+    *
+    * @param url the URL of the site that has finished indexing
+    */
     public void markSiteFinished(String url) {
         activeSites.remove(url);
     }
 
-    /**
-     * Возвращает коллекцию активных сайтов.
+     /**
+     * Returns the collection of active sites.
      *
-     * @return коллекция объектов SiteEntity активных сайтов
+     * @return a collection of SiteEntity objects representing active sites
      */
-    public Collection<SiteEntity> getActiveSites() {
+     public Collection<SiteEntity> getActiveSites() {
         return activeSites.values();
     }
 
-    /**
-     * Сбрасывает все данные хранилища: посещённые URL и активные сайты.
+     /**
+     * Clears all stored data: visited URLs and active sites.
      */
-    public void resetAll() {
+     public void resetAll() {
         visited.clear();
         activeSites.clear();
     }
