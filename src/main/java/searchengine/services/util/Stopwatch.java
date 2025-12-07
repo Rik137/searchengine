@@ -10,15 +10,15 @@ import lombok.Getter;
 @Getter
 public class Stopwatch {
 
-     /**
-     * The start time in nanoseconds
-     */
-     private long startTime;
+    /**
+    * The start time in nanoseconds
+    */
+    private long startTime;
 
-     /**
-     * Measured time in nanoseconds
-     */
-     private long elapsedNanos;
+    /**
+    * Measured time in nanoseconds
+    */
+    private long elapsedNanos;
 
     /**
     * Starts the time measurement

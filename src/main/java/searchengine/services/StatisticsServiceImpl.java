@@ -16,7 +16,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
+ /**
  * Service for generating statistics on website indexing.
  *
  * <p>Provides both aggregated information across all sites and detailed data for each site.

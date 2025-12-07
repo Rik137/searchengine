@@ -8,7 +8,7 @@ import searchengine.model.SiteEntity;
 import java.util.List;
 import java.util.Optional;
 
-/**
+ /**
  * Repository for working with the {@link PageEntity} entity.
  * <p>Contains methods for searching, retrieving, and counting pages by website.</p>
  */

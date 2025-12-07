@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
-/**
+ /**
  * Configuration bean containing a list of websites to be indexed.
  * <p>
  * The list is loaded from application.yml / application.properties
@@ -19,7 +19,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "indexing-settings")
 public class SitesList {
 
-    /**
+     /**
      * List of websites to be indexed.
      * Each website is represented by a {@link Site} object.
      */

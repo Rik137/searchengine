@@ -8,7 +8,7 @@ import searchengine.model.LemmaEntity;
 import searchengine.model.SiteEntity;
 import java.util.List;
 
-/**
+ /**
  * Repository for working with the {@link IndexEntity} entity.
  * <p>Contains methods for retrieving lemma indexes and counting their occurrences on websites.</p>
  */

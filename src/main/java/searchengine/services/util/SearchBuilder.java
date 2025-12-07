@@ -146,7 +146,7 @@ public class SearchBuilder {
                 .orElse("");
         String siteName = Optional.ofNullable(page.getSiteEntity())
                 .map(s -> s.getName())
-                .orElse("(без имени)");
+                .orElse("(no name)");
         String pagePath = Optional.ofNullable(page.getPath()).orElse("");
         String uri = pagePath.startsWith("http") ? extractRelativePath(pagePath, siteUrl) : pagePath;
         String content = Optional.ofNullable(page.getContent()).orElse("");
@@ -169,7 +169,7 @@ public class SearchBuilder {
         Matcher matcher = pattern.matcher(html);
         if (matcher.find()) {
             String title = matcher.group(1).replaceAll("\\s+", " ").trim();
-            return title.isEmpty() ? "(без заголовка)" : title;
+            return title.isEmpty() ? "(no title)" : title;
         }
         return "(no title)";
     }
